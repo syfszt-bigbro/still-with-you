@@ -90,12 +90,12 @@ struct OnboardingView: View {
   private var memoryStep: some View {
     VStack(alignment: .leading, spacing: 18) {
       setupHeader("步骤 3 · 聊天与记忆", required: false,
-        detail: "导入 TXT、Markdown、JSON 或 JSONL。原文与可选总结分开保存；导入后由你确认聊天中的哪一位是对方。")
+        detail: "可一次选多个 TXT、Markdown、JSON 或 JSONL，支持 WeFlow Markdown。原文与可选总结分开保存；导入后由你确认聊天中的哪一位是对方。")
       Card {
         Label("\(model.state.historicalRecords?.count ?? 0) 条原始片段 · \(model.effectiveKnowledge.memories.count) 张可选总结",
           systemImage: "text.book.closed")
           .font(.headline)
-        Text("导入不会强制生成描述或总结。AI 可以给出说话人建议，但必须由你确认；已有总结可在“记忆”页替换或删除，原文不受影响。")
+        Text("导入不会强制生成描述或总结。AI 可以给出说话人建议，但必须由你确认；候选不对时可取消并撤销本次导入。")
           .font(.caption).foregroundStyle(.secondary)
         Button("导入聊天记录…") { model.importHistory() }
           .buttonStyle(.borderedProminent).disabled(model.historySpeakerDetectionBusy)

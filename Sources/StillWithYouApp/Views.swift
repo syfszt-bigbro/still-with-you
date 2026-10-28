@@ -129,15 +129,25 @@ struct HistorySpeakerReviewView: View {
       if review.candidates.isEmpty {
         Text("记录中没有明确的说话人字段，无法可靠区分双方。原文仍会保存和搜索，但程序不会猜测谁是对方。")
           .padding().background(Color.mist, in: RoundedRectangle(cornerRadius: 10))
-        HStack { Spacer(); Button("完成") { model.confirmHistorySpeaker(nil) }.buttonStyle(.borderedProminent) }
-      } else {
-        Picker("选择谁是对方", selection: $selected) {
-          Text("请手动选择").tag("")
-          ForEach(review.candidates) { candidate in
-            Text("\(candidate.name) · \(candidate.messageCount) 条" + (candidate.name == review.suggestedSpeaker ? " · 建议" : ""))
-              .tag(candidate.name)
+        HStack {
+          if review.importedCount > 0 && !review.preservesConfirmedAliases {
+            Button("取消并撤销本次导入", role: .destructive) {
+              model.cancelHistorySpeakerReview()
+            }
           }
-        }.pickerStyle(.radioGroup)
+          Spacer()
+          Button("完成") { model.confirmHistorySpeaker(nil) }.buttonStyle(.borderedProminent)
+        }
+      } else {
+        ScrollView {
+          Picker("选择谁是对方", selection: $selected) {
+            Text("请手动选择").tag("")
+            ForEach(review.candidates) { candidate in
+              Text("\(candidate.name) · \(candidate.messageCount) 条" + (candidate.name == review.suggestedSpeaker ? " · 建议" : ""))
+                .tag(candidate.name)
+            }
+          }.pickerStyle(.radioGroup)
+        }.frame(maxHeight: 280)
         DisclosureGroup("查看各说话人样例") {
           ForEach(review.candidates) { candidate in
             VStack(alignment: .leading, spacing: 4) {
@@ -153,6 +163,11 @@ struct HistorySpeakerReviewView: View {
           : "确认后，对方的原话才会用于口吻学习和你我映射；以后每次导入都会重新让你确认。")
           .font(.caption).foregroundStyle(.secondary)
         HStack {
+          if review.importedCount > 0 && !review.preservesConfirmedAliases {
+            Button("取消并撤销本次导入", role: .destructive) {
+              model.cancelHistorySpeakerReview()
+            }
+          }
           Spacer()
           Button("确认“\(selected)”是对方") { model.confirmHistorySpeaker(selected) }
             .buttonStyle(.borderedProminent).disabled(selected.isEmpty)
@@ -910,7 +925,7 @@ struct MemoryView: View {
             Button(model.historySpeakerDetectionBusy ? "正在识别说话人…" : "重新识别并添加对方名称") {
               model.reviewImportedHistorySpeakers()
             }.disabled(model.historySpeakerDetectionBusy || model.library.history.isEmpty)
-            Text(UIStrings.text("支持 UTF-8 TXT / Markdown / JSON / JSONL，单文件最多 10 MB，重复片段自动跳过。"))
+            Text(UIStrings.text("可多选；支持 UTF-8 TXT / Markdown / JSON / JSONL 与 WeFlow Markdown，每个文件最多 10 MB。"))
               .font(.caption).foregroundStyle(.secondary)
           }
           Text("导入只保存原文，不强制生成总结。记录含明确说话人时，启用 AI 会发送少量名称与样例用于建议；无论建议是什么，最终都由你选择谁是对方。")

@@ -166,6 +166,39 @@ XCTAssertEqual(Set(HistoryImportPolicy.candidates(in: markdown).map(\.name)), Se
 let plainNotes = try HistoryImporter.parse(
   data: Data("标题：今天的记录\n地点：上海\n这里只是普通笔记。".utf8), fileExtension: "txt")
 XCTAssertEqual(Set(plainNotes.map(\.speaker)), Set(["历史原文"]))
+let weFlow = """
+# 测试会话
+
+- 会话ID: `123@chatroom`
+- 会话类型: 群聊
+- 导出时间: 2026\\-07\\-28 13:07:45
+- 导出工具: WeFlow
+
+---
+
+## 2026\\-04\\-11 19:56:50 阿岚
+
+带伞，别淋着。
+
+## 2026\\-04\\-11 19:57:02 我
+
+> 阿岚: 带伞
+
+知道了。
+"""
+let weFlowRecords = try HistoryImporter.parse(data: Data(weFlow.utf8), fileExtension: "md")
+XCTAssertEqual(weFlowRecords.count, 2)
+XCTAssertEqual(weFlowRecords.map(\.speaker), ["阿岚", "我"])
+XCTAssertEqual(weFlowRecords[0].timestamp, "2026-04-11 19:56:50")
+XCTAssertEqual(weFlowRecords[0].sourceID, "weflow:123@chatroom")
+XCTAssertEqual(weFlowRecords.map(\.sourceIndex), [0, 1])
+XCTAssertTrue(weFlowRecords[1].text.contains("> 阿岚: 带伞"))
+XCTAssertFalse(HistoryImportPolicy.candidates(in: weFlowRecords).contains { $0.name == "会话ID" })
+let anotherChat = weFlow.replacingOccurrences(of: "123@chatroom", with: "other-chat")
+let anotherChatRecords = try HistoryImporter.parse(
+  data: Data(anotherChat.utf8), fileExtension: "md")
+XCTAssertEqual(HistoryImporter.merging(anotherChatRecords, into: weFlowRecords).count, 4)
+XCTAssertEqual(HistoryImporter.merging(weFlowRecords, into: weFlowRecords).count, 2)
 var firstBatch = [
   HistoricalMessage(speaker: "我", text: "到家了"),
   HistoricalMessage(speaker: "她", text: "你好呀"),

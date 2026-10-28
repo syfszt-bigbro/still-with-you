@@ -358,17 +358,26 @@ struct PendingHistorySpeakerReview: Identifiable {
   func importHistory() {
     let panel = NSOpenPanel()
     panel.title = "导入历史聊天"
-    panel.allowsMultipleSelection = false
+    panel.allowsMultipleSelection = true
     panel.canChooseDirectories = false
-    guard panel.runModal() == .OK, let url = panel.url else { return }
+    guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
     do {
-      let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-      guard size <= 10 * 1024 * 1024 else { throw HistoryImportError.invalid("文件超过 10 MB，请拆分后导入。") }
-      let incoming = try HistoryImporter.parse(data: Data(contentsOf: url), fileExtension: url.pathExtension)
+      var incoming: [HistoricalMessage] = []
+      for url in panel.urls {
+        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        guard size <= 10 * 1024 * 1024 else {
+          throw HistoryImportError.invalid("\(url.lastPathComponent) 超过 10 MB，请拆分后导入。")
+        }
+        incoming += try HistoryImporter.parse(
+          data: Data(contentsOf: url), fileExtension: url.pathExtension)
+      }
       let previous = state.historicalRecords ?? library.history
+      let previousKeys = Set(previous.map(\.duplicateKey))
       let result = HistoryImportPolicy.importing(
         incoming, into: previous, knowledge: effectiveKnowledge, profile: profile)
-      let pendingRecords = HistorySpeakerAssignment.markingPending(result.records, imported: incoming)
+      let addedRecords = result.records.filter { !previousKeys.contains($0.duplicateKey) }
+      let pendingRecords = HistorySpeakerAssignment.markingPending(
+        result.records, imported: addedRecords)
       state.historicalRecords = pendingRecords
       library.history = pendingRecords
       state.voiceSpeaker = nil
@@ -379,14 +388,37 @@ struct PendingHistorySpeakerReview: Identifiable {
       state.onboarding?.memoryConfigured = true
       save()
       guard storageError.isEmpty else { return }
-      let added = result.records.count - previous.count
+      let added = addedRecords.count
       let duplicates = max(0, incoming.count - added)
-      notice = "已保存 \(added) 条历史原文，正在识别说话人；没有自动生成描述或总结。"
+      let fileLabel = panel.urls.count == 1 ? "" : "\(panel.urls.count) 个文件共"
+      notice = "已保存\(fileLabel) \(added) 条历史原文，正在识别说话人；没有自动生成描述或总结。"
+      guard added > 0 else {
+        notice = "所选文件中的原文都已存在，未重复导入。"
+        return
+      }
+      let candidates = HistoryImportPolicy.candidates(in: addedRecords)
       startHistorySpeakerReview(
-        candidates: result.speakers, localSuggestion: result.suggestedSpeaker,
-        recordKeys: Set(incoming.map(\.duplicateKey)), importedCount: added,
+        candidates: candidates,
+        localSuggestion: HistoryImportPolicy.localSuggestion(
+          candidates: candidates, profile: profile),
+        recordKeys: Set(addedRecords.map(\.duplicateKey)), importedCount: added,
         duplicateCount: duplicates)
     } catch { notice = "导入失败：\(error.localizedDescription)" }
+  }
+
+  func cancelHistorySpeakerReview() {
+    guard let review = pendingHistorySpeakerReview else { return }
+    historySpeakerReviewRevision = UUID()
+    historySpeakerDetectionBusy = false
+    if !review.preservesConfirmedAliases, review.importedCount > 0 {
+      library.history.removeAll { review.recordKeys.contains($0.duplicateKey) }
+      state.historicalRecords = library.history
+      state.onboarding?.memoryConfigured =
+        !library.history.isEmpty || !effectiveKnowledge.memories.isEmpty
+      save()
+      notice = "已撤销本次导入，没有删除以前的历史记录。"
+    }
+    pendingHistorySpeakerReview = nil
   }
 
   func reviewImportedHistorySpeakers() {

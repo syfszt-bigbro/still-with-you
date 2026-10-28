@@ -75,14 +75,20 @@ public struct HistoricalMessage: Codable, Identifiable, Sendable {
   public var speaker: String
   public var kind: String
   public var text: String
+  /// Stable import provenance. Optional so existing backups remain readable.
+  public var sourceID: String?
+  public var sourceIndex: Int?
   /// `nil` means this imported row has not been reviewed yet. This is stored on
   /// each row so different exports may use different labels for the same person.
   public var isCompanion: Bool?
-  public init(id: String = UUID().uuidString, timestamp: String = "", speaker: String = "历史原文", kind: String = "text_or_mixed", text: String, isCompanion: Bool? = nil) {
+  public init(id: String = UUID().uuidString, timestamp: String = "", speaker: String = "历史原文", kind: String = "text_or_mixed", text: String, isCompanion: Bool? = nil, sourceID: String? = nil, sourceIndex: Int? = nil) {
     self.id = id; self.timestamp = timestamp; self.speaker = speaker; self.kind = kind; self.text = text
     self.isCompanion = isCompanion
+    self.sourceID = sourceID; self.sourceIndex = sourceIndex
   }
-  public var duplicateKey: String { "\(timestamp)\u{0}\(speaker)\u{0}\(text)" }
+  public var duplicateKey: String {
+    "\(sourceID ?? "")\u{0}\(sourceIndex.map(String.init) ?? "")\u{0}\(timestamp)\u{0}\(speaker)\u{0}\(text)"
+  }
 }
 
 public enum HistoryImportError: LocalizedError {
@@ -121,10 +127,85 @@ public enum HistoryImporter {
       } catch let error as HistoryImportError { throw error }
       catch { throw HistoryImportError.invalid("JSON 格式不正确；没有导入任何内容。") }
     } else if ["txt", "md", "markdown"].contains(ext) {
-      records = parseLabeledText(text) ?? chunks(text).map { HistoricalMessage(text: $0) }
+      records = parseWeFlowMarkdown(text) ?? parseLabeledText(text)
+        ?? chunks(text).map { HistoricalMessage(text: $0) }
     } else { throw HistoryImportError.invalid("支持 TXT、Markdown、JSON 和 JSONL 文件。") }
     guard !records.isEmpty else { throw HistoryImportError.invalid("文件没有可导入的消息。") }
     return records
+  }
+
+  /// WeFlow exports each message as a level-two Markdown heading followed by
+  /// its original body. Parse that structure before the generic labeled-text
+  /// fallback so metadata, quoted replies, and link titles never become fake
+  /// speakers.
+  private static func parseWeFlowMarkdown(_ text: String) -> [HistoricalMessage]? {
+    guard text.contains("导出工具: WeFlow") || text.contains("导出工具：WeFlow") else {
+      return nil
+    }
+    struct MessageSection {
+      var timestamp: String
+      var speaker: String
+      var lines: [String]
+      var sourceIndex: Int
+    }
+    let sourceID = weFlowConversationID(text).map { "weflow:\($0)" } ?? "weflow:unknown"
+    var current: MessageSection?
+    var records: [HistoricalMessage] = []
+    var nextSourceIndex = 0
+
+    func flush() {
+      guard let section = current else { return }
+      let body = section.lines.joined(separator: "\n")
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+      if !body.isEmpty {
+        for chunk in chunks(body) {
+          records.append(HistoricalMessage(
+            timestamp: section.timestamp, speaker: section.speaker, text: chunk,
+            sourceID: sourceID, sourceIndex: section.sourceIndex))
+        }
+      }
+    }
+
+    for rawLine in text.split(separator: "\n", omittingEmptySubsequences: false) {
+      let line = String(rawLine).trimmingCharacters(in: CharacterSet(charactersIn: "\r"))
+      if let header = weFlowMessageHeader(line) {
+        flush()
+        current = MessageSection(
+          timestamp: header.timestamp, speaker: header.speaker, lines: [],
+          sourceIndex: nextSourceIndex)
+        nextSourceIndex += 1
+      } else if current != nil {
+        current?.lines.append(line)
+      }
+    }
+    flush()
+    return records.isEmpty ? nil : records
+  }
+
+  private static func weFlowConversationID(_ text: String) -> String? {
+    for rawLine in text.split(separator: "\n", omittingEmptySubsequences: false) {
+      let line = String(rawLine).trimmingCharacters(in: .whitespacesAndNewlines)
+      guard line.hasPrefix("- 会话ID:") || line.hasPrefix("- 会话ID：") else { continue }
+      guard let colon = line.firstIndex(where: { $0 == ":" || $0 == "：" }) else { continue }
+      let value = line[line.index(after: colon)...]
+        .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`")))
+      if !value.isEmpty { return value }
+    }
+    return nil
+  }
+
+  private static func weFlowMessageHeader(_ line: String) -> (timestamp: String, speaker: String)? {
+    let pattern = #"^##\s+(\d{4}\\?-\d{2}\\?-\d{2}\s+\d{2}:\d{2}:\d{2})\s+(.+?)\s*$"#
+    guard let regex = try? NSRegularExpression(pattern: pattern),
+      let match = regex.firstMatch(
+        in: line, range: NSRange(line.startIndex..<line.endIndex, in: line)),
+      let timestampRange = Range(match.range(at: 1), in: line),
+      let speakerRange = Range(match.range(at: 2), in: line)
+    else { return nil }
+    let timestamp = String(line[timestampRange]).replacingOccurrences(of: "\\", with: "")
+    let speaker = String(line[speakerRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !speaker.isEmpty else { return nil }
+    return (timestamp, speaker)
   }
 
   /// Recognizes simple exported transcripts such as `我：你好` / `她: 在呢`.
