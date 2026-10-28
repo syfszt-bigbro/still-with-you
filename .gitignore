@@ -1,0 +1,24 @@
+.build/
+dist/
+.swiftpm/
+.DS_Store
+*.dmg
+*.zip
+
+# Never commit private companion material or credentials.
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.mobileprovision
+private/
+user-data/
+exes/
+Assets/custom/
+Tests/Fixtures/private/
+
+# Generated signing helpers and local release output.
+.credential-vault-v1
+.voice-vault-v1
+release-audit.json

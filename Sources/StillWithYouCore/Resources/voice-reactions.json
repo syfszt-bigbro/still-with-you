@@ -1,0 +1,1091 @@
+{
+  "zh": {
+    "dizzy": [
+      "你把我绕晕了，先停一小会儿。",
+      "别转啦，我的目光都打结了。",
+      "这是鼠标，还是你的小风车呀？",
+      "转圈比赛你赢了，我申请暂停。",
+      "我的方向感先去休息了。"
+    ],
+    "fastDrag": [
+      "慢一点嘛，我都快跟不上了。",
+      "等一下，我的小短腿要冒烟了。",
+      "你这是搬家，还是带我起飞呀？",
+      "我的鞋底都要追不上屏幕了。",
+      "慢一点，这趟不是赶飞机。"
+    ],
+    "repeatedDrag": [
+      "怎么又搬家呀，让我歇一会儿嘛。",
+      "新地址还没记住，又换地方啦？",
+      "你在给我挑风水宝地吗？",
+      "这个位置能住满一分钟吗？",
+      "要不先把家具摆好再叫我？"
+    ],
+    "top": [
+      "好，现在轮到我俯视你了。",
+      "这里视野不错，我先占个高处。",
+      "站这么高，今天我来当瞭望员。",
+      "站得高，连发呆都有了气势。",
+      "今天的高空席位被我订下了。"
+    ],
+    "bottom": [
+      "把我放这么低，是要我仰视你吗？",
+      "好吧，我就在底下给你托个底。",
+      "楼下住户已就位，有事往下看。",
+      "这儿离地近，站得踏实。",
+      "从这个角度看，你还挺高的。"
+    ],
+    "corner": [
+      "这个角落归我了，正好安个小窝。",
+      "让我靠边待着呀？行，我偷偷看热闹。",
+      "角落也不错，安静得适合做梦。",
+      "角落虽小，刚好装得下我。",
+      "小窝选好了，暂时不搬啦。"
+    ],
+    "left": [
+      "左边这块地，我先替你守着。",
+      "今天安排我当左护法呀？",
+      "往左看，我在这儿呢。",
+      "左边留个位置给我就好。",
+      "我从左边探个头，不打扰你。"
+    ],
+    "right": [
+      "右边也挺好，我就在旁边陪你。",
+      "右护法到岗，不收站岗费。",
+      "我靠右站，给你的大计划让点地方。",
+      "右边的小席位，我坐定了。",
+      "有事叫我，我就在右手边。"
+    ],
+    "center": [
+      "怎么把我摆正中间啦，今天我是主角？",
+      "这个位置有点显眼，我先站稳。",
+      "站在这里，是不是挡住你的灵感啦？",
+      "把我摆中间，是要拍合照吗？",
+      "让我先站正，别抢了你的风头。"
+    ],
+    "screenChange": [
+      "咦，换一块屏幕，就当出门旅行了。",
+      "新地方到了，我先认认路。",
+      "跨屏搬家完成，行李只有我自己。",
+      "这边的风景好像不太一样。",
+      "桌面护照又多盖了一个章。"
+    ],
+    "longDrag": [
+      "带我逛这么久，终于选好位置啦？",
+      "这趟桌面旅行有点长，让我歇歇脚。",
+      "终点到了吧？我想在这儿坐一会儿。",
+      "桌面一日游，到这里收队。",
+      "下次出发前让我先穿双跑鞋。"
+    ],
+    "reach": [
+      "让我轻轻碰一下，抓到你的小鼠标啦。",
+      "停得这么近，那我伸手打个招呼。",
+      "碰一下就放你走，不耽误你忙。",
+      "借你的小箭头碰个指尖。",
+      "轻轻一下，算是打过招呼啦。"
+    ],
+    "hover": [
+      "鼠标停在这儿，是有话想说吗？",
+      "我看见你啦，想聊就点点我。",
+      "你不说话，那我们就安静待一会儿。",
+      "你停着，我也陪你停一会儿。",
+      "不用急着说，想好了再来。"
+    ],
+    "nearbyAbove": [
+      "你在上头停好久了，我脖子都举酸老。 往我这边挪一点嘛。",
+      "你在上头停好久了，我脖子都举酸老。 过来摆两句嘛。",
+      "你在上头停好久了，我脖子都举酸老。 莫光在那里看热闹嘛。",
+      "你在上头停好久了，我脖子都举酸老。 我都看到你了。",
+      "你在上头停好久了，我脖子都举酸老。 靠近一点噻。"
+    ],
+    "nearbyBelow": [
+      "你在下面待好久了，我低头都低累了。 往我这边挪一点嘛。",
+      "你在下面待好久了，我低头都低累了。 过来摆两句嘛。",
+      "你在下面待好久了，我低头都低累了。 莫光在那里看热闹嘛。",
+      "你在下面待好久了，我低头都低累了。 我都看到你了。",
+      "你在下面待好久了，我低头都低累了。 靠近一点噻。"
+    ],
+    "nearbyLeft": [
+      "你在左边站那么远，我手够不到哦。 往我这边挪一点嘛。",
+      "你在左边站那么远，我手够不到哦。 过来摆两句嘛。",
+      "你在左边站那么远，我手够不到哦。 莫光在那里看热闹嘛。",
+      "你在左边站那么远，我手够不到哦。 我都看到你了。",
+      "你在左边站那么远，我手够不到哦。 靠近一点噻。"
+    ],
+    "nearbyRight": [
+      "你在右边站那么远，我摸不到你哦。 往我这边挪一点嘛。",
+      "你在右边站那么远，我摸不到你哦。 过来摆两句嘛。",
+      "你在右边站那么远，我摸不到你哦。 莫光在那里看热闹嘛。",
+      "你在右边站那么远，我摸不到你哦。 我都看到你了。",
+      "你在右边站那么远，我摸不到你哦。 靠近一点噻。"
+    ]
+  },
+  "en": {
+    "dizzy": [
+      "You’ve made me dizzy. Let’s pause.",
+      "Is that a cursor or a tiny merry-go-round?",
+      "My eyes need a moment to catch up.",
+      "You win the spinning contest. I call a break.",
+      "My sense of direction has stepped out."
+    ],
+    "fastDrag": [
+      "Slow down, my little legs can’t keep up.",
+      "Are we moving house or taking off?",
+      "Wait for me; I’m still catching up.",
+      "Even my shoes are falling behind.",
+      "Easy now; we’re not catching a flight."
+    ],
+    "repeatedDrag": [
+      "Another move? Let me settle in first.",
+      "I hadn’t even learned the last address.",
+      "Still looking for the perfect spot for me?",
+      "Can I stay here for a whole minute?",
+      "Shall we choose the furniture before I move in?"
+    ],
+    "top": [
+      "Now it’s my turn to look down at you.",
+      "The view is lovely up here.",
+      "I’ll be today’s lookout.",
+      "Even daydreaming feels grand up here.",
+      "I’ve reserved the seat with a view."
+    ],
+    "bottom": [
+      "Am I supposed to look up to you now?",
+      "Your downstairs neighbor has arrived.",
+      "I’ll hold the fort down here.",
+      "Close to the ground feels reassuring.",
+      "You look rather tall from down here."
+    ],
+    "corner": [
+      "This corner is my little home now.",
+      "A quiet corner? I can work with that.",
+      "I’ll watch the world from my cozy nook.",
+      "A tiny nook, just my size.",
+      "My little home is chosen. No moving for now."
+    ],
+    "left": [
+      "Your left-hand lookout is on duty.",
+      "Look left; that’s where I am.",
+      "I’ll keep you company from this side.",
+      "Just save me a little space on the left.",
+      "Peeking in from the left, quietly."
+    ],
+    "right": [
+      "Your right-hand companion has arrived.",
+      "I’ll stand here and give your ideas room.",
+      "Look right if you need me.",
+      "This little seat on the right is mine.",
+      "Call if you need me. I’m right here."
+    ],
+    "center": [
+      "Center stage? Am I the star today?",
+      "Quite a prominent spot you’ve chosen.",
+      "Let me know if I’m blocking your inspiration.",
+      "Am I in the middle for a group photo?",
+      "Let me stand straight without stealing the show."
+    ],
+    "screenChange": [
+      "A new screen! A tiny holiday for me.",
+      "New neighborhood; let me find my bearings.",
+      "Moving screens, with just myself as luggage.",
+      "The view seems different over here.",
+      "Another stamp in my desktop passport."
+    ],
+    "longDrag": [
+      "Quite a tour! Have we found my spot?",
+      "My little legs could use a rest after that.",
+      "Is this our stop? I’ll settle down here.",
+      "Our grand desktop tour ends here.",
+      "Next time, let me put my running shoes on."
+    ],
+    "hover": [
+      "Something you’d like to say?",
+      "I see you. Tap me if you want to chat.",
+      "We can just enjoy a quiet moment.",
+      "You’ve paused; I’ll pause with you.",
+      "No hurry to speak. I’m here when you’re ready."
+    ],
+    "reach": [
+      "Just a little tap. Got your cursor!",
+      "You’re close enough for a tiny hello.",
+      "One gentle touch, then back to your day.",
+      "May I tap your little arrow?",
+      "One gentle tap counts as a hello."
+    ],
+    "nearbyAbove": [
+      "My neck is getting tired looking up at you. Come a little closer.",
+      "My neck is getting tired looking up at you. Want to chat?",
+      "My neck is getting tired looking up at you. I can see you over there.",
+      "My neck is getting tired looking up at you. Move this way a little.",
+      "My neck is getting tired looking up at you. You can say hello."
+    ],
+    "nearbyBelow": [
+      "Looking down at you is tiring my neck. Come a little closer.",
+      "Looking down at you is tiring my neck. Want to chat?",
+      "Looking down at you is tiring my neck. I can see you over there.",
+      "Looking down at you is tiring my neck. Move this way a little.",
+      "Looking down at you is tiring my neck. You can say hello."
+    ],
+    "nearbyLeft": [
+      "You are too far to my left for me to reach. Come a little closer.",
+      "You are too far to my left for me to reach. Want to chat?",
+      "You are too far to my left for me to reach. I can see you over there.",
+      "You are too far to my left for me to reach. Move this way a little.",
+      "You are too far to my left for me to reach. You can say hello."
+    ],
+    "nearbyRight": [
+      "You are too far to my right for me to reach. Come a little closer.",
+      "You are too far to my right for me to reach. Want to chat?",
+      "You are too far to my right for me to reach. I can see you over there.",
+      "You are too far to my right for me to reach. Move this way a little.",
+      "You are too far to my right for me to reach. You can say hello."
+    ]
+  },
+  "ja": {
+    "dizzy": [
+      "目が回っちゃった。ちょっと休憩しよう。",
+      "そのカーソル、小さな風車みたい。",
+      "待って、目が追いつかないよ。",
+      "ぐるぐる競争はあなたの勝ち。休憩！",
+      "方向感覚がちょっとお出かけしちゃった。"
+    ],
+    "fastDrag": [
+      "ゆっくりね。足が追いつかないよ。",
+      "お引っ越し？それとも離陸するの？",
+      "待って待って、そんなに急がないで。",
+      "靴まで置いていかれそう。",
+      "飛行機に乗るわけじゃないから、ゆっくりね。"
+    ],
+    "repeatedDrag": [
+      "またお引っ越し？少し落ち着かせて。",
+      "前の住所もまだ覚えてないよ。",
+      "私にぴったりの場所を探してるの？",
+      "ここに一分くらい住んでもいい？",
+      "先に家具の場所を決めておこうか？"
+    ],
+    "top": [
+      "今度は私が見下ろす番だね。",
+      "ここ、なかなかいい眺め。",
+      "今日はここで見張り番をするね。",
+      "ここだと、ぼんやりするのも堂々とできるね。",
+      "眺めのいい席、予約しました。"
+    ],
+    "bottom": [
+      "今度は私が見上げるのかな？",
+      "下の階に引っ越してきました。",
+      "ここからそっと支えるね。",
+      "地面に近いと落ち着くね。",
+      "下から見ると、ずいぶん背が高いね。"
+    ],
+    "corner": [
+      "この隅っこ、私のおうちにしよう。",
+      "静かな隅っこも悪くないね。",
+      "ここでこっそり見守ってるよ。",
+      "小さいけど、私にぴったりの隅っこ。",
+      "おうちが決まった。しばらくここにいよう。"
+    ],
+    "left": [
+      "左側の見張り番、到着です。",
+      "左を見て。ここにいるよ。",
+      "今日は左隣でお付き合い。",
+      "左に少しだけ場所を空けてね。",
+      "左からそっと顔を出してるよ。"
+    ],
+    "right": [
+      "右側のお供、到着です。",
+      "ここでアイデアの邪魔にならないようにするね。",
+      "用があったら右を見てね。",
+      "右側の小さな席、いただきます。",
+      "用があったら呼んでね。すぐ右にいるよ。"
+    ],
+    "center": [
+      "真ん中？今日は私が主役なの？",
+      "ずいぶん目立つ席だね。",
+      "ひらめきの邪魔になってないかな？",
+      "真ん中なのは、集合写真を撮るから？",
+      "主役を奪わないように、まっすぐ立つね。"
+    ],
+    "screenChange": [
+      "別の画面だ。ちょっとした旅行だね。",
+      "新しい場所、まずは道を覚えよう。",
+      "画面を越えてお引っ越し。荷物は私だけ。",
+      "こっちは少し景色が違うね。",
+      "デスクトップの旅券に、またスタンプ一つ。"
+    ],
+    "longDrag": [
+      "長いお散歩だったね。ここに決めた？",
+      "たくさん歩いたから少し休ませて。",
+      "ここが終点？ちょっと落ち着こう。",
+      "デスクトップ一周の旅はここまで。",
+      "次は先に走りやすい靴を履かせてね。"
+    ],
+    "hover": [
+      "何か話したいこと、ある？",
+      "見えてるよ。話したくなったら押してね。",
+      "何も話さず、一緒にのんびりでもいいね。",
+      "あなたがひと休みなら、私も一緒に。",
+      "話すのは急がなくていいよ。"
+    ],
+    "reach": [
+      "ちょん。カーソル、つかまえた。",
+      "近くに来たから、手でごあいさつ。",
+      "軽く触るだけ。すぐ自由にしてあげる。",
+      "小さな矢印に、指先でごあいさつ。",
+      "軽くちょん、これであいさつ完了。"
+    ],
+    "nearbyAbove": [
+      "上を見すぎて首が疲れちゃった。 もう少し近くに来て。",
+      "上を見すぎて首が疲れちゃった。 ちょっとお話ししよう。",
+      "上を見すぎて首が疲れちゃった。 そこにいるの、見えてるよ。",
+      "上を見すぎて首が疲れちゃった。 こっちにおいで。",
+      "上を見すぎて首が疲れちゃった。 挨拶してもいいんだよ。"
+    ],
+    "nearbyBelow": [
+      "下を見すぎて首が疲れちゃった。 もう少し近くに来て。",
+      "下を見すぎて首が疲れちゃった。 ちょっとお話ししよう。",
+      "下を見すぎて首が疲れちゃった。 そこにいるの、見えてるよ。",
+      "下を見すぎて首が疲れちゃった。 こっちにおいで。",
+      "下を見すぎて首が疲れちゃった。 挨拶してもいいんだよ。"
+    ],
+    "nearbyLeft": [
+      "左側のそこまでは手が届かないよ。 もう少し近くに来て。",
+      "左側のそこまでは手が届かないよ。 ちょっとお話ししよう。",
+      "左側のそこまでは手が届かないよ。 そこにいるの、見えてるよ。",
+      "左側のそこまでは手が届かないよ。 こっちにおいで。",
+      "左側のそこまでは手が届かないよ。 挨拶してもいいんだよ。"
+    ],
+    "nearbyRight": [
+      "右側のそこまでは手が届かないよ。 もう少し近くに来て。",
+      "右側のそこまでは手が届かないよ。 ちょっとお話ししよう。",
+      "右側のそこまでは手が届かないよ。 そこにいるの、見えてるよ。",
+      "右側のそこまでは手が届かないよ。 こっちにおいで。",
+      "右側のそこまでは手が届かないよ。 挨拶してもいいんだよ。"
+    ]
+  },
+  "ko": {
+    "dizzy": [
+      "빙글빙글 돌렸더니 어지러워. 잠깐 쉬자.",
+      "커서야, 작은 풍차야?",
+      "잠깐만, 눈이 따라가질 못하겠어.",
+      "빙글빙글 대결은 네가 이겼어. 잠깐 쉴게.",
+      "내 방향 감각이 잠시 외출했어."
+    ],
+    "fastDrag": [
+      "천천히 가자. 내 다리가 못 따라가겠어.",
+      "이사 가는 거야, 이륙하는 거야?",
+      "잠깐만, 나도 같이 가!",
+      "신발까지 뒤처지겠어.",
+      "비행기 타러 가는 것도 아닌데, 천천히 가자."
+    ],
+    "repeatedDrag": [
+      "또 이사야? 잠깐만 자리 잡게 해 줘.",
+      "아까 주소도 아직 못 외웠어.",
+      "나한테 딱 맞는 자리를 찾는 중이야?",
+      "여기서 일 분만 살아도 될까?",
+      "이사 전에 가구 자리부터 정할까?"
+    ],
+    "top": [
+      "이제 내가 내려다볼 차례네.",
+      "여기 전망 꽤 좋은데?",
+      "오늘은 내가 망을 볼게.",
+      "여기서는 멍하니 있어도 당당해 보여.",
+      "전망 좋은 자리를 예약했어."
+    ],
+    "bottom": [
+      "이번엔 내가 올려다봐야 하는 거야?",
+      "아랫집 이웃이 도착했어.",
+      "여기 아래에서 든든히 지켜 줄게.",
+      "바닥 가까이 있으니 든든하네.",
+      "아래에서 보니 꽤 커 보여."
+    ],
+    "corner": [
+      "이 구석을 내 작은 집으로 할래.",
+      "조용한 구석도 괜찮네.",
+      "여기서 살짝 구경하고 있을게.",
+      "작지만 나한테 딱 맞는 구석이야.",
+      "작은 집을 골랐어. 당분간은 여기 있을래."
+    ],
+    "left": [
+      "왼쪽 지킴이가 왔어.",
+      "왼쪽을 봐. 나 여기 있어.",
+      "오늘은 왼쪽에서 함께할게.",
+      "왼쪽에 작은 자리만 남겨 줘.",
+      "왼쪽에서 조용히 고개만 내밀게."
+    ],
+    "right": [
+      "오른쪽 친구가 도착했어.",
+      "생각할 공간을 남겨 두고 여기 서 있을게.",
+      "필요하면 오른쪽을 봐 줘.",
+      "오른쪽 작은 자리는 내 거야.",
+      "필요하면 불러. 바로 오른쪽에 있어."
+    ],
+    "center": [
+      "정중앙이네? 오늘 주인공은 나야?",
+      "꽤 눈에 띄는 자리인데?",
+      "내가 좋은 생각을 가리고 있진 않지?",
+      "단체 사진 찍으려고 가운데 둔 거야?",
+      "네 주인공 자리를 뺏지 않게 똑바로 설게."
+    ],
+    "screenChange": [
+      "다른 화면이네. 작은 여행 같아.",
+      "새 동네니까 길부터 익혀 볼게.",
+      "화면을 넘어 이사 완료. 짐은 나 하나야.",
+      "여기는 풍경이 조금 다르네.",
+      "내 바탕화면 여권에 도장 하나 추가!"
+    ],
+    "longDrag": [
+      "꽤 오래 구경했네. 여기로 정한 거야?",
+      "많이 돌아다녔으니 다리 좀 쉬게 해 줘.",
+      "여기가 종점이야? 잠깐 쉬자.",
+      "바탕화면 일주 여행은 여기까지.",
+      "다음엔 먼저 운동화부터 신게 해 줘."
+    ],
+    "hover": [
+      "하고 싶은 말 있어?",
+      "보고 있어. 이야기하고 싶으면 눌러 줘.",
+      "말없이 잠깐 같이 있어도 좋지.",
+      "네가 잠깐 멈추면 나도 함께 멈출게.",
+      "서둘러 말하지 않아도 돼."
+    ],
+    "reach": [
+      "톡. 커서를 잡았다!",
+      "가까이 왔으니 손으로 인사할게.",
+      "살짝 한 번만 만지고 보내 줄게.",
+      "작은 화살표에 손끝으로 인사할게.",
+      "가볍게 톡, 인사 완료야."
+    ],
+    "nearbyAbove": [
+      "계속 올려다보니 목이 아파. 조금 가까이 와.",
+      "계속 올려다보니 목이 아파. 잠깐 이야기할까?",
+      "계속 올려다보니 목이 아파. 거기 있는 거 보여.",
+      "계속 올려다보니 목이 아파. 이쪽으로 조금 와 줘.",
+      "계속 올려다보니 목이 아파. 인사해도 좋아."
+    ],
+    "nearbyBelow": [
+      "계속 내려다보니 목이 아파. 조금 가까이 와.",
+      "계속 내려다보니 목이 아파. 잠깐 이야기할까?",
+      "계속 내려다보니 목이 아파. 거기 있는 거 보여.",
+      "계속 내려다보니 목이 아파. 이쪽으로 조금 와 줘.",
+      "계속 내려다보니 목이 아파. 인사해도 좋아."
+    ],
+    "nearbyLeft": [
+      "왼쪽으로 너무 멀어서 손이 안 닿아. 조금 가까이 와.",
+      "왼쪽으로 너무 멀어서 손이 안 닿아. 잠깐 이야기할까?",
+      "왼쪽으로 너무 멀어서 손이 안 닿아. 거기 있는 거 보여.",
+      "왼쪽으로 너무 멀어서 손이 안 닿아. 이쪽으로 조금 와 줘.",
+      "왼쪽으로 너무 멀어서 손이 안 닿아. 인사해도 좋아."
+    ],
+    "nearbyRight": [
+      "오른쪽으로 너무 멀어서 손이 안 닿아. 조금 가까이 와.",
+      "오른쪽으로 너무 멀어서 손이 안 닿아. 잠깐 이야기할까?",
+      "오른쪽으로 너무 멀어서 손이 안 닿아. 거기 있는 거 보여.",
+      "오른쪽으로 너무 멀어서 손이 안 닿아. 이쪽으로 조금 와 줘.",
+      "오른쪽으로 너무 멀어서 손이 안 닿아. 인사해도 좋아."
+    ]
+  },
+  "fr": {
+    "dizzy": [
+      "Tu me donnes le tournis. Petite pause ?",
+      "C’est un curseur ou un petit manège ?",
+      "Attends, mes yeux ont du retard.",
+      "Tu gagnes le concours de tours. Je demande une pause.",
+      "Mon sens de l’orientation est parti se reposer."
+    ],
+    "fastDrag": [
+      "Doucement, mes petites jambes ne suivent plus.",
+      "On déménage ou on décolle ?",
+      "Attends-moi, j’arrive !",
+      "Même mes chaussures sont à la traîne.",
+      "Doucement, on n’a pas d’avion à prendre."
+    ],
+    "repeatedDrag": [
+      "Encore un déménagement ? Laisse-moi souffler.",
+      "Je ne connaissais même pas encore l’ancienne adresse.",
+      "Tu cherches le coin parfait pour moi ?",
+      "Je peux rester ici une minute entière ?",
+      "On choisit les meubles avant que j’emménage ?"
+    ],
+    "top": [
+      "À mon tour de te regarder de haut.",
+      "La vue est plutôt jolie ici.",
+      "Je serai la sentinelle du jour.",
+      "Même rêvasser prend de l’allure ici.",
+      "J’ai réservé la place avec vue."
+    ],
+    "bottom": [
+      "C’est à moi de lever les yeux vers toi ?",
+      "Ta voisine du dessous est arrivée.",
+      "Je tiendrai la forteresse en bas.",
+      "Près du sol, c’est rassurant.",
+      "Tu parais grand vu d’en bas."
+    ],
+    "corner": [
+      "Ce petit coin sera mon chez-moi.",
+      "Un coin tranquille, ça me plaît aussi.",
+      "Je vais observer le monde depuis mon petit nid.",
+      "Un petit coin juste à ma taille.",
+      "Mon petit nid est choisi. Je reste un peu."
+    ],
+    "left": [
+      "La sentinelle de gauche est en poste.",
+      "Regarde à gauche, je suis là.",
+      "Je te tiendrai compagnie de ce côté.",
+      "Garde-moi juste un peu de place à gauche.",
+      "Je passe une petite tête à gauche, sans bruit."
+    ],
+    "right": [
+      "Ta compagne de droite est arrivée.",
+      "Je reste ici pour laisser de la place à tes idées.",
+      "Un coup d’œil à droite si tu as besoin de moi.",
+      "Cette petite place à droite est pour moi.",
+      "Appelle-moi si besoin, je suis juste à droite."
+    ],
+    "center": [
+      "Au centre de la scène ? Je suis la vedette ?",
+      "Tu m’as choisi une place bien visible.",
+      "Dis-moi si je cache ton inspiration.",
+      "Au milieu pour une photo de groupe ?",
+      "Je me tiens droite, sans te voler la vedette."
+    ],
+    "screenChange": [
+      "Un nouvel écran ! Mes petites vacances.",
+      "Nouveau quartier, je vais prendre mes repères.",
+      "Déménagement d’écran, avec moi pour seul bagage.",
+      "Le paysage semble différent par ici.",
+      "Un tampon de plus sur mon passeport de bureau."
+    ],
+    "longDrag": [
+      "Quelle promenade ! On a trouvé ma place ?",
+      "Mes petites jambes méritent une pause.",
+      "C’est notre arrêt ? Je m’installe ici.",
+      "Notre grand tour du bureau s’arrête ici.",
+      "La prochaine fois, laisse-moi mettre mes baskets."
+    ],
+    "hover": [
+      "Tu voulais me dire quelque chose ?",
+      "Je te vois. Clique si tu veux discuter.",
+      "On peut aussi partager un petit silence.",
+      "Tu fais une pause, je la partage avec toi.",
+      "Pas besoin de parler tout de suite."
+    ],
+    "reach": [
+      "Une petite touche. J’ai ton curseur !",
+      "Te voilà assez près pour un petit bonjour.",
+      "Juste une caresse, puis je te laisse travailler.",
+      "Je peux effleurer ta petite flèche ?",
+      "Une petite touche, et le bonjour est donné."
+    ],
+    "nearbyAbove": [
+      "Je fatigue à te regarder là-haut. Approche un peu.",
+      "Je fatigue à te regarder là-haut. On bavarde ?",
+      "Je fatigue à te regarder là-haut. Je te vois là-bas.",
+      "Je fatigue à te regarder là-haut. Viens par ici.",
+      "Je fatigue à te regarder là-haut. Tu peux me dire bonjour."
+    ],
+    "nearbyBelow": [
+      "Je fatigue à te regarder en bas. Approche un peu.",
+      "Je fatigue à te regarder en bas. On bavarde ?",
+      "Je fatigue à te regarder en bas. Je te vois là-bas.",
+      "Je fatigue à te regarder en bas. Viens par ici.",
+      "Je fatigue à te regarder en bas. Tu peux me dire bonjour."
+    ],
+    "nearbyLeft": [
+      "Tu es trop loin à ma gauche pour que je te touche. Approche un peu.",
+      "Tu es trop loin à ma gauche pour que je te touche. On bavarde ?",
+      "Tu es trop loin à ma gauche pour que je te touche. Je te vois là-bas.",
+      "Tu es trop loin à ma gauche pour que je te touche. Viens par ici.",
+      "Tu es trop loin à ma gauche pour que je te touche. Tu peux me dire bonjour."
+    ],
+    "nearbyRight": [
+      "Tu es trop loin à ma droite pour que je te touche. Approche un peu.",
+      "Tu es trop loin à ma droite pour que je te touche. On bavarde ?",
+      "Tu es trop loin à ma droite pour que je te touche. Je te vois là-bas.",
+      "Tu es trop loin à ma droite pour que je te touche. Viens par ici.",
+      "Tu es trop loin à ma droite pour que je te touche. Tu peux me dire bonjour."
+    ]
+  },
+  "ru": {
+    "dizzy": [
+      "У меня уже голова кружится. Давай передохнём.",
+      "Это курсор или маленькая карусель?",
+      "Погоди, глаза за тобой не успевают.",
+      "В состязании по кружению победа твоя. Мне перерыв.",
+      "Моё чувство направления ушло отдыхать."
+    ],
+    "fastDrag": [
+      "Помедленнее, мои ноги не успевают.",
+      "Мы переезжаем или взлетаем?",
+      "Подожди меня, я догоняю!",
+      "Даже мои туфли отстают.",
+      "Потише, мы ведь не опаздываем на самолёт."
+    ],
+    "repeatedDrag": [
+      "Снова переезд? Дай хоть немного освоиться.",
+      "Я ещё прошлый адрес не запомнила.",
+      "Ищешь для меня идеальное место?",
+      "Можно пожить здесь хотя бы минуту?",
+      "Может, сначала расставим мебель?"
+    ],
+    "top": [
+      "Теперь моя очередь смотреть на тебя сверху.",
+      "А вид отсюда неплохой.",
+      "Сегодня я буду дозорной.",
+      "Здесь даже мечтать получается величественно.",
+      "Место с видом забронировано за мной."
+    ],
+    "bottom": [
+      "Теперь мне смотреть на тебя снизу вверх?",
+      "Соседка с нижнего этажа прибыла.",
+      "Буду держать оборону здесь, внизу.",
+      "Поближе к земле как-то спокойнее.",
+      "Снизу ты кажешься очень высоким."
+    ],
+    "corner": [
+      "Этот уголок станет моим маленьким домом.",
+      "Тихий уголок мне тоже подходит.",
+      "Буду наблюдать из своего уютного гнёздышка.",
+      "Маленький уголок, как раз под мой размер.",
+      "Гнёздышко выбрано. Пока останусь здесь."
+    ],
+    "left": [
+      "Левый фланг под моей охраной.",
+      "Посмотри налево, я здесь.",
+      "Сегодня составлю компанию с этой стороны.",
+      "Оставь мне немного места слева.",
+      "Тихонько выглядываю с левой стороны."
+    ],
+    "right": [
+      "Твоя соседка справа прибыла.",
+      "Постою здесь, оставлю место твоим идеям.",
+      "Если понадоблюсь, посмотри направо.",
+      "Это маленькое место справа — моё.",
+      "Позови, если понадоблюсь. Я прямо справа."
+    ],
+    "center": [
+      "В центре сцены? Сегодня я главная?",
+      "Какое заметное место ты выбрал.",
+      "Надеюсь, я не заслоняю вдохновение.",
+      "Меня поставили в центр для общего фото?",
+      "Встану ровно и не буду затмевать тебя."
+    ],
+    "screenChange": [
+      "Другой экран! Маленькое путешествие.",
+      "Новый район, надо осмотреться.",
+      "Переезд между экранами. Весь багаж — это я.",
+      "Здесь пейзаж немного другой.",
+      "Ещё один штамп в моём настольном паспорте."
+    ],
+    "longDrag": [
+      "Вот это прогулка! Мы нашли моё место?",
+      "После такого пути моим ногам нужен отдых.",
+      "Это наша остановка? Устроюсь здесь.",
+      "Большая экскурсия по рабочему столу закончена.",
+      "В следующий раз дай сначала надеть кроссовки."
+    ],
+    "hover": [
+      "Хочешь что-нибудь сказать?",
+      "Я тебя вижу. Нажми, если хочется поговорить.",
+      "Можно и просто немного помолчать вместе.",
+      "Ты остановился, и я побуду рядом.",
+      "Не обязательно сразу что-то говорить."
+    ],
+    "reach": [
+      "Лёгкое касание. Поймала твой курсор!",
+      "Ты так близко, можно поздороваться рукой.",
+      "Коснусь разок и отпущу по делам.",
+      "Можно коснуться твоей маленькой стрелочки?",
+      "Лёгкое касание — вот мы и поздоровались."
+    ],
+    "nearbyAbove": [
+      "У меня устала шея смотреть на тебя наверху. Подойди поближе.",
+      "У меня устала шея смотреть на тебя наверху. Поболтаем?",
+      "У меня устала шея смотреть на тебя наверху. Я тебя вижу.",
+      "У меня устала шея смотреть на тебя наверху. Давай сюда.",
+      "У меня устала шея смотреть на тебя наверху. Можешь поздороваться."
+    ],
+    "nearbyBelow": [
+      "У меня устала шея смотреть на тебя внизу. Подойди поближе.",
+      "У меня устала шея смотреть на тебя внизу. Поболтаем?",
+      "У меня устала шея смотреть на тебя внизу. Я тебя вижу.",
+      "У меня устала шея смотреть на тебя внизу. Давай сюда.",
+      "У меня устала шея смотреть на тебя внизу. Можешь поздороваться."
+    ],
+    "nearbyLeft": [
+      "Ты слишком далеко слева, я не дотянусь. Подойди поближе.",
+      "Ты слишком далеко слева, я не дотянусь. Поболтаем?",
+      "Ты слишком далеко слева, я не дотянусь. Я тебя вижу.",
+      "Ты слишком далеко слева, я не дотянусь. Давай сюда.",
+      "Ты слишком далеко слева, я не дотянусь. Можешь поздороваться."
+    ],
+    "nearbyRight": [
+      "Ты слишком далеко справа, я не дотянусь. Подойди поближе.",
+      "Ты слишком далеко справа, я не дотянусь. Поболтаем?",
+      "Ты слишком далеко справа, я не дотянусь. Я тебя вижу.",
+      "Ты слишком далеко справа, я не дотянусь. Давай сюда.",
+      "Ты слишком далеко справа, я не дотянусь. Можешь поздороваться."
+    ]
+  },
+  "pt": {
+    "dizzy": [
+      "Estás a deixar-me tonta. Fazemos uma pausa?",
+      "É um cursor ou um pequeno carrossel?",
+      "Espera, os meus olhos não acompanham.",
+      "Ganhaste o concurso das voltas. Peço uma pausa.",
+      "O meu sentido de orientação foi descansar."
+    ],
+    "fastDrag": [
+      "Devagar, as minhas pernas não acompanham.",
+      "Estamos a mudar de casa ou a levantar voo?",
+      "Espera por mim, já vou!",
+      "Até os meus sapatos ficam para trás.",
+      "Calma, não temos um avião para apanhar."
+    ],
+    "repeatedDrag": [
+      "Outra mudança? Deixa-me pousar as malas.",
+      "Ainda nem sabia a morada anterior.",
+      "Estás à procura do lugar perfeito para mim?",
+      "Posso ficar aqui um minuto inteiro?",
+      "Escolhemos os móveis antes da mudança?"
+    ],
+    "top": [
+      "Agora sou eu que te vejo lá de cima.",
+      "A vista daqui é bem bonita.",
+      "Hoje fico de vigia.",
+      "Até sonhar acordada parece grandioso aqui.",
+      "Reservei o lugar com vista."
+    ],
+    "bottom": [
+      "Agora tenho de olhar para ti lá de baixo?",
+      "A vizinha do andar de baixo chegou.",
+      "Fico aqui em baixo a guardar o forte.",
+      "Perto do chão sinto-me mais segura.",
+      "Visto de baixo, pareces bem alto."
+    ],
+    "corner": [
+      "Este cantinho vai ser a minha casa.",
+      "Um canto sossegado também me agrada.",
+      "Vou espreitar o mundo do meu pequeno ninho.",
+      "Um cantinho mesmo à minha medida.",
+      "O meu ninho está escolhido. Fico por aqui."
+    ],
+    "left": [
+      "A sentinela da esquerda está a postos.",
+      "Olha para a esquerda, estou aqui.",
+      "Hoje faço-te companhia deste lado.",
+      "Guarda-me só um espacinho à esquerda.",
+      "Vou espreitar da esquerda, sem fazer barulho."
+    ],
+    "right": [
+      "A tua companhia da direita chegou.",
+      "Fico aqui para deixar espaço às tuas ideias.",
+      "Se precisares de mim, olha para a direita.",
+      "Este lugarzinho à direita é meu.",
+      "Chama se precisares. Estou mesmo à direita."
+    ],
+    "center": [
+      "No centro do palco? Hoje sou a estrela?",
+      "Escolheste um lugar bem visível.",
+      "Diz-me se estou a tapar a inspiração.",
+      "No meio para uma fotografia de grupo?",
+      "Vou ficar direita sem te roubar o protagonismo."
+    ],
+    "screenChange": [
+      "Um ecrã novo! Umas pequenas férias.",
+      "Bairro novo, vou orientar-me.",
+      "Mudança de ecrã, só comigo na bagagem.",
+      "A paisagem parece diferente deste lado.",
+      "Mais um carimbo no meu passaporte do ambiente de trabalho."
+    ],
+    "longDrag": [
+      "Que passeio! Já encontrámos o meu lugar?",
+      "As minhas pernas merecem uma pausa.",
+      "É a nossa paragem? Instalo-me aqui.",
+      "A nossa grande visita termina aqui.",
+      "Da próxima vez, deixa-me calçar os ténis."
+    ],
+    "hover": [
+      "Querias dizer-me alguma coisa?",
+      "Estou a ver-te. Clica se quiseres conversar.",
+      "Também podemos partilhar um bocadinho de silêncio.",
+      "Se fazes uma pausa, faço-te companhia.",
+      "Não precisas de falar já."
+    ],
+    "reach": [
+      "Um toquezinho. Apanhei o teu cursor!",
+      "Estás perto o suficiente para um pequeno olá.",
+      "Só um toque suave, depois deixo-te continuar.",
+      "Posso tocar na tua pequena seta?",
+      "Um toque suave já serve de olá."
+    ],
+    "nearbyAbove": [
+      "Meu pescoço está cansando de olhar para cima. Chegue mais perto.",
+      "Meu pescoço está cansando de olhar para cima. Vamos conversar?",
+      "Meu pescoço está cansando de olhar para cima. Estou vendo você aí.",
+      "Meu pescoço está cansando de olhar para cima. Venha para cá.",
+      "Meu pescoço está cansando de olhar para cima. Pode dizer oi."
+    ],
+    "nearbyBelow": [
+      "Meu pescoço está cansando de olhar para baixo. Chegue mais perto.",
+      "Meu pescoço está cansando de olhar para baixo. Vamos conversar?",
+      "Meu pescoço está cansando de olhar para baixo. Estou vendo você aí.",
+      "Meu pescoço está cansando de olhar para baixo. Venha para cá.",
+      "Meu pescoço está cansando de olhar para baixo. Pode dizer oi."
+    ],
+    "nearbyLeft": [
+      "Você está longe demais à minha esquerda para eu alcançar. Chegue mais perto.",
+      "Você está longe demais à minha esquerda para eu alcançar. Vamos conversar?",
+      "Você está longe demais à minha esquerda para eu alcançar. Estou vendo você aí.",
+      "Você está longe demais à minha esquerda para eu alcançar. Venha para cá.",
+      "Você está longe demais à minha esquerda para eu alcançar. Pode dizer oi."
+    ],
+    "nearbyRight": [
+      "Você está longe demais à minha direita para eu alcançar. Chegue mais perto.",
+      "Você está longe demais à minha direita para eu alcançar. Vamos conversar?",
+      "Você está longe demais à minha direita para eu alcançar. Estou vendo você aí.",
+      "Você está longe demais à minha direita para eu alcançar. Venha para cá.",
+      "Você está longe demais à minha direita para eu alcançar. Pode dizer oi."
+    ]
+  },
+  "es": {
+    "dizzy": [
+      "Me estás mareando. ¿Hacemos una pausa?",
+      "¿Es un cursor o un pequeño tiovivo?",
+      "Espera, mis ojos no te siguen.",
+      "Ganaste el concurso de vueltas. Pido una pausa.",
+      "Mi sentido de la orientación se fue a descansar."
+    ],
+    "fastDrag": [
+      "Más despacio, mis piernas no dan para tanto.",
+      "¿Nos mudamos o vamos a despegar?",
+      "¡Espérame, que ya voy!",
+      "Hasta mis zapatos se quedan atrás.",
+      "Tranquilo, no tenemos un avión que tomar."
+    ],
+    "repeatedDrag": [
+      "¿Otra mudanza? Déjame acomodarme un poco.",
+      "Ni siquiera me sabía la dirección anterior.",
+      "¿Buscas el rincón perfecto para mí?",
+      "¿Puedo quedarme aquí un minuto entero?",
+      "¿Elegimos los muebles antes de mudarme?"
+    ],
+    "top": [
+      "Ahora me toca mirarte desde arriba.",
+      "Las vistas de aquí son bonitas.",
+      "Hoy seré la vigía.",
+      "Hasta soñar despierta tiene categoría aquí.",
+      "He reservado el asiento con vistas."
+    ],
+    "bottom": [
+      "¿Ahora tengo que mirarte desde abajo?",
+      "Ha llegado tu vecina de abajo.",
+      "Guardaré el fuerte desde aquí.",
+      "Cerca del suelo me siento más segura.",
+      "Desde abajo pareces bastante alto."
+    ],
+    "corner": [
+      "Este rincón será mi pequeña casa.",
+      "Un rincón tranquilo también me gusta.",
+      "Miraré el mundo desde mi pequeño nido.",
+      "Un rincón justo de mi tamaño.",
+      "Mi pequeño nido está elegido. Me quedo un rato."
+    ],
+    "left": [
+      "La guardiana de la izquierda está lista.",
+      "Mira a la izquierda, aquí estoy.",
+      "Hoy te acompaño desde este lado.",
+      "Guárdame un poquito de sitio a la izquierda.",
+      "Me asomo por la izquierda, sin hacer ruido."
+    ],
+    "right": [
+      "Tu compañera de la derecha ha llegado.",
+      "Me quedo aquí para dar espacio a tus ideas.",
+      "Si me necesitas, mira a la derecha.",
+      "Este pequeño sitio a la derecha es mío.",
+      "Llámame si me necesitas. Estoy justo a la derecha."
+    ],
+    "center": [
+      "¿En el centro del escenario? ¿Soy la estrella?",
+      "Me has elegido un sitio bien visible.",
+      "Avísame si te tapo la inspiración.",
+      "¿En medio para una foto de grupo?",
+      "Me pondré recta sin robarte el protagonismo."
+    ],
+    "screenChange": [
+      "¡Otra pantalla! Mis pequeñas vacaciones.",
+      "Barrio nuevo, voy a orientarme.",
+      "Mudanza de pantalla, conmigo como único equipaje.",
+      "El paisaje parece distinto por aquí.",
+      "Otro sello en mi pasaporte de escritorio."
+    ],
+    "longDrag": [
+      "¡Vaya paseo! ¿Ya tenemos sitio?",
+      "Mis piernas se merecen un descanso.",
+      "¿Es nuestra parada? Me acomodo aquí.",
+      "Nuestra gran excursión termina aquí.",
+      "La próxima vez, déjame ponerme las zapatillas."
+    ],
+    "hover": [
+      "¿Querías decirme algo?",
+      "Te veo. Haz clic si quieres charlar.",
+      "También podemos compartir un ratito de silencio.",
+      "Si te detienes, me detengo contigo.",
+      "No hace falta hablar enseguida."
+    ],
+    "reach": [
+      "Un toquecito. ¡Atrapé tu cursor!",
+      "Estás cerca para un pequeño saludo.",
+      "Solo un toque suave y te dejo seguir.",
+      "¿Puedo tocar tu pequeña flecha?",
+      "Un toquecito ya cuenta como saludo."
+    ],
+    "nearbyAbove": [
+      "Se me cansa el cuello de mirar hacia arriba. Acércate un poco.",
+      "Se me cansa el cuello de mirar hacia arriba. ¿Charlamos?",
+      "Se me cansa el cuello de mirar hacia arriba. Te veo ahí.",
+      "Se me cansa el cuello de mirar hacia arriba. Ven hacia aquí.",
+      "Se me cansa el cuello de mirar hacia arriba. Puedes saludarme."
+    ],
+    "nearbyBelow": [
+      "Se me cansa el cuello de mirar hacia abajo. Acércate un poco.",
+      "Se me cansa el cuello de mirar hacia abajo. ¿Charlamos?",
+      "Se me cansa el cuello de mirar hacia abajo. Te veo ahí.",
+      "Se me cansa el cuello de mirar hacia abajo. Ven hacia aquí.",
+      "Se me cansa el cuello de mirar hacia abajo. Puedes saludarme."
+    ],
+    "nearbyLeft": [
+      "Estás demasiado lejos a mi izquierda para alcanzarte. Acércate un poco.",
+      "Estás demasiado lejos a mi izquierda para alcanzarte. ¿Charlamos?",
+      "Estás demasiado lejos a mi izquierda para alcanzarte. Te veo ahí.",
+      "Estás demasiado lejos a mi izquierda para alcanzarte. Ven hacia aquí.",
+      "Estás demasiado lejos a mi izquierda para alcanzarte. Puedes saludarme."
+    ],
+    "nearbyRight": [
+      "Estás demasiado lejos a mi derecha para alcanzarte. Acércate un poco.",
+      "Estás demasiado lejos a mi derecha para alcanzarte. ¿Charlamos?",
+      "Estás demasiado lejos a mi derecha para alcanzarte. Te veo ahí.",
+      "Estás demasiado lejos a mi derecha para alcanzarte. Ven hacia aquí.",
+      "Estás demasiado lejos a mi derecha para alcanzarte. Puedes saludarme."
+    ]
+  },
+  "ar": {
+    "dizzy": [
+      "أدرت رأسي! لنتوقف قليلًا.",
+      "هل هذا مؤشر أم دوامة صغيرة؟",
+      "لحظة، عيناي لا تلحقان بك.",
+      "فزت بمسابقة الدوران، وأنا أطلب استراحة.",
+      "ذهب إحساسي بالاتجاه ليستريح قليلًا."
+    ],
+    "fastDrag": [
+      "على مهلك، قدماي لا تواكبانك.",
+      "هل ننتقل أم نستعد للإقلاع؟",
+      "انتظرني، أحاول اللحاق بك!",
+      "حتى حذائي يتأخر عنك.",
+      "على مهلك، لسنا في طريقنا إلى طائرة."
+    ],
+    "repeatedDrag": [
+      "انتقال آخر؟ دعني أستقر قليلًا.",
+      "لم أحفظ العنوان السابق بعد.",
+      "هل تبحث لي عن المكان المثالي؟",
+      "هل يمكنني البقاء هنا دقيقة كاملة؟",
+      "ما رأيك أن نختار الأثاث قبل الانتقال؟"
+    ],
+    "top": [
+      "الآن دوري أن أنظر إليك من فوق.",
+      "المنظر جميل من هنا.",
+      "سأتولى المراقبة اليوم.",
+      "حتى أحلام اليقظة تبدو مهيبة من هنا.",
+      "حجزت المقعد المطل على المشهد."
+    ],
+    "bottom": [
+      "هل عليّ الآن أن أنظر إليك من أسفل؟",
+      "وصلت جارتك في الطابق السفلي.",
+      "سأحرس المكان من هنا في الأسفل.",
+      "القرب من الأرض يمنحني بعض الطمأنينة.",
+      "تبدو طويلًا من هذه الزاوية."
+    ],
+    "corner": [
+      "ستكون هذه الزاوية بيتي الصغير.",
+      "زاوية هادئة؟ يناسبني ذلك.",
+      "سأراقب العالم من ركني المريح.",
+      "ركن صغير على مقاسي تمامًا.",
+      "اخترت عشي الصغير، سأبقى هنا قليلًا."
+    ],
+    "left": [
+      "حارسة الجانب الأيسر في موقعها.",
+      "انظر يسارًا، أنا هنا.",
+      "سأرافقك من هذا الجانب اليوم.",
+      "اترك لي مساحة صغيرة على اليسار.",
+      "سأطل من اليسار بهدوء."
+    ],
+    "right": [
+      "وصلت رفيقتك على اليمين.",
+      "سأقف هنا وأترك مساحة لأفكارك.",
+      "إن احتجتني، انظر إلى اليمين.",
+      "هذا المقعد الصغير على اليمين لي.",
+      "نادني إن احتجتني، أنا على يمينك."
+    ],
+    "center": [
+      "في وسط المسرح؟ هل أنا النجمة اليوم؟",
+      "اخترت لي مكانًا بارزًا.",
+      "أخبرني إن كنت أحجب عنك الإلهام.",
+      "هل وضعتني في الوسط من أجل صورة جماعية؟",
+      "سأقف باستقامة دون أن أخطف الأضواء منك."
+    ],
+    "screenChange": [
+      "شاشة جديدة! إنها رحلة صغيرة.",
+      "حي جديد، سأتعرف على المكان.",
+      "انتقال بين الشاشات، وأمتعتي هي أنا فقط.",
+      "يبدو المشهد مختلفًا من هذا الجانب.",
+      "ختم جديد في جواز سفري على سطح المكتب."
+    ],
+    "longDrag": [
+      "يا لها من جولة! هل وجدنا مكاني؟",
+      "تستحق قدماي استراحة بعد هذا المشوار.",
+      "هل هذه محطتنا؟ سأستقر هنا.",
+      "تنتهي جولتنا الكبيرة هنا.",
+      "في المرة القادمة دعني أرتدي حذاء الجري أولًا."
+    ],
+    "hover": [
+      "هل تود قول شيء؟",
+      "أراك. انقر إن أردت الحديث.",
+      "يمكننا أيضًا أن نتشارك لحظة هادئة.",
+      "إذا توقفت قليلًا، سأتوقف معك.",
+      "لا حاجة إلى الكلام فورًا."
+    ],
+    "reach": [
+      "لمسة خفيفة. أمسكت بالمؤشر!",
+      "أنت قريب بما يكفي لتحية صغيرة.",
+      "لمسة لطيفة، ثم أتركك تتابع يومك.",
+      "هل ألمس سهمك الصغير؟",
+      "لمسة لطيفة تكفي لإلقاء التحية."
+    ],
+    "nearbyAbove": [
+      "تعبت رقبتي من النظر إليك في الأعلى. اقترب قليلاً.",
+      "تعبت رقبتي من النظر إليك في الأعلى. هل ندردش؟",
+      "تعبت رقبتي من النظر إليك في الأعلى. أراك هناك.",
+      "تعبت رقبتي من النظر إليك في الأعلى. تعال إلى هنا.",
+      "تعبت رقبتي من النظر إليك في الأعلى. يمكنك إلقاء التحية."
+    ],
+    "nearbyBelow": [
+      "تعبت رقبتي من النظر إليك في الأسفل. اقترب قليلاً.",
+      "تعبت رقبتي من النظر إليك في الأسفل. هل ندردش؟",
+      "تعبت رقبتي من النظر إليك في الأسفل. أراك هناك.",
+      "تعبت رقبتي من النظر إليك في الأسفل. تعال إلى هنا.",
+      "تعبت رقبتي من النظر إليك في الأسفل. يمكنك إلقاء التحية."
+    ],
+    "nearbyLeft": [
+      "أنت بعيد إلى يساري ولا أستطيع الوصول إليك. اقترب قليلاً.",
+      "أنت بعيد إلى يساري ولا أستطيع الوصول إليك. هل ندردش؟",
+      "أنت بعيد إلى يساري ولا أستطيع الوصول إليك. أراك هناك.",
+      "أنت بعيد إلى يساري ولا أستطيع الوصول إليك. تعال إلى هنا.",
+      "أنت بعيد إلى يساري ولا أستطيع الوصول إليك. يمكنك إلقاء التحية."
+    ],
+    "nearbyRight": [
+      "أنت بعيد إلى يميني ولا أستطيع الوصول إليك. اقترب قليلاً.",
+      "أنت بعيد إلى يميني ولا أستطيع الوصول إليك. هل ندردش؟",
+      "أنت بعيد إلى يميني ولا أستطيع الوصول إليك. أراك هناك.",
+      "أنت بعيد إلى يميني ولا أستطيع الوصول إليك. تعال إلى هنا.",
+      "أنت بعيد إلى يميني ولا أستطيع الوصول إليك. يمكنك إلقاء التحية."
+    ]
+  }
+}
