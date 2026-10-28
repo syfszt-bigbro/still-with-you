@@ -6,6 +6,8 @@ public enum ConversationQualityIssue: String, Codable, CaseIterable, Sendable {
   case unrelatedSleep
   case identityOrRelationshipInflation
   case excessiveLength
+  case placeholderLeak
+  case tooThin
 }
 
 public enum ConversationQualityGuard {
@@ -21,7 +23,13 @@ public enum ConversationQualityGuard {
     var result: [ConversationQualityIssue] = []
     let key = normalized(clean)
     if recentAssistant.suffix(12).contains(where: { normalized($0) == key }) { result.append(.repeated) }
-    if clean.count > 1200 { result.append(.excessiveLength) }
+    if clean.count > 480 || clean.components(separatedBy: .newlines).filter({ !$0.isEmpty }).count > 6 {
+      result.append(.excessiveLength)
+    }
+    if ["...", "…", "……", "。。。"].contains(clean) { result.append(.tooThin) }
+    if clean.contains("表情包：") || clean.contains("表情包:") || clean.contains("[sticker") {
+      result.append(.placeholderLeak)
+    }
 
     let inputMentionsSleep = ["睡", "困", "醒", "起床", "晚安", "熬夜", "sleep", "tired"].contains {
       input.localizedCaseInsensitiveContains($0)
@@ -38,6 +46,6 @@ public enum ConversationQualityGuard {
 
   public static func rewriteInstruction(for issues: [ConversationQualityIssue]) -> String {
     let names = issues.map(\.rawValue).joined(separator: ", ")
-    return "上一版回复未通过质量检查（\(names)）。请重新回答用户眼前的话：换一种自然表达，不重复近期回复；不无关地劝睡觉；不冒充真人或夸大关系；默认1—4个短句。只输出新回复。"
+    return "上一版回复未通过质量检查（\(names)）。请重新回答用户眼前的话：换一种自然表达，不重复近期回复；不只回省略号，不输出‘表情包’等占位标签；不无关地劝睡觉；不冒充真人或夸大关系；默认1—4个短句。只输出新回复。"
   }
 }

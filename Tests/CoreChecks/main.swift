@@ -952,7 +952,14 @@ do {
   let natural = ConversationQualityGuard.issues(
     input: "我刚煮好面", reply: "放点葱没？别坨了，快吃。", recentAssistant: ["今天忙不忙？"])
   precondition(natural.isEmpty)
-  print("PASS: conversation quality guard catches repetition, fixation and relationship inflation")
+  precondition(ConversationQualityGuard.issues(
+    input: "我想你了", reply: "…", recentAssistant: []).contains(.tooThin))
+  precondition(ConversationQualityGuard.issues(
+    input: "我想抱抱你", reply: "[表情包：😒]", recentAssistant: []).contains(.placeholderLeak))
+  precondition(ConversationQualityGuard.issues(
+    input: "今天过得怎么样", reply: String(repeating: "这是一段过长回复。", count: 60),
+    recentAssistant: []).contains(.excessiveLength))
+  print("PASS: quality guard catches repetition, sleep fixation, placeholders, thin/long replies and relationship inflation")
 }
 
 // Public seam: optional API really means optional for ordinary life chat; the
