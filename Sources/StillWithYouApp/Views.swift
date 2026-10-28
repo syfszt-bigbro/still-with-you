@@ -100,6 +100,15 @@ struct MainView: View {
       get: { model.state.onboarding?.completed != true },
       set: { _ in }
     )) { OnboardingView(model: model) }
+    .sheet(item: Binding(
+      get: { model.state.onboarding?.completed == true ? model.pendingCharacterPhoto : nil },
+      set: { value in
+        if model.state.onboarding?.completed == true { model.pendingCharacterPhoto = value }
+      }
+    )) { pending in
+      CharacterPhotoEditorView(model: model, pending: pending)
+        .interactiveDismissDisabled(model.characterBusy)
+    }
   }
   func banner(_ text: String, color: Color) -> some View {
     Text(text).font(.callout).frame(maxWidth: .infinity, alignment: .leading).padding(12)
@@ -1114,8 +1123,18 @@ struct SettingsView: View {
             Text("内置抽象形象").tag("default")
             if model.hasCustomCharacter { Text("我的照片动画卡").tag("custom") }
           }
-          Button(model.hasCustomCharacter ? "换一张照片并重新生成…" : "用照片生成动画卡…") { model.importCharacterPhoto() }
-          Text("图片只在本机处理。会保留整张照片，生成头像和 11 组带动作标识的轻动画卡；不会用 AI 改人物姿势，原照片也不会被复制进资料库。")
+          if model.hasCustomCharacter { CharacterAssetPreviewStrip(model: model) }
+          HStack {
+            if model.hasCustomCharacter {
+              Button(model.canAdjustCharacterPhoto ? "调整取景…" : "重新选择后调整…") {
+                model.adjustCharacterPhoto()
+              }
+            }
+            Button(model.hasCustomCharacter ? "换一张照片…" : "选择照片并预览…") {
+              model.importCharacterPhoto()
+            }
+          }
+          Text("图片只在本机处理。选择后先预览和调整，确认后生成头像及 11 组轻动画卡；私人工作图用于以后再次调整，不进入导出备份。")
             .font(.caption).foregroundStyle(.secondary)
           ReadingBookSettings(model: model)
           Toggle(UIStrings.text("始终置顶"), isOn: $model.state.preferences.alwaysOnTop).onChange(

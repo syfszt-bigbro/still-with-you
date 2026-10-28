@@ -45,6 +45,10 @@ struct OnboardingView: View {
       HistorySpeakerReviewView(model: model, review: review)
         .interactiveDismissDisabled()
     }
+    .sheet(item: $model.pendingCharacterPhoto) { pending in
+      CharacterPhotoEditorView(model: model, pending: pending)
+        .interactiveDismissDisabled(model.characterBusy)
+    }
   }
 
   private var identityStep: some View {
@@ -72,16 +76,31 @@ struct OnboardingView: View {
   private var photoStep: some View {
     VStack(alignment: .leading, spacing: 18) {
       setupHeader("步骤 2 · 桌面形象", required: false,
-        detail: "选一张照片，程序会在本机保留完整画面，生成头像与 11 组轻动画卡。它不会用 AI 改姿势；也可以直接使用内置抽象形象。")
+        detail: "选一张照片，先预览并调整取景，再生成头像与 11 组轻动画卡。它不会用 AI 改姿势；也可以直接使用内置抽象形象。")
       Card {
         Label(model.hasCustomCharacter ? "已生成本机动作包" : "尚未添加照片",
           systemImage: model.hasCustomCharacter ? "checkmark.seal.fill" : "photo.badge.plus")
           .font(.headline).foregroundStyle(model.hasCustomCharacter ? Color.moss : Color.ink)
-        Text("图片不会自动上传；原图不会被复制进资料库，只保存生成后的头像和动作 PNG。")
+        if model.hasCustomCharacter {
+          CharacterAssetPreviewStrip(model: model)
+          Text("上面就是桌面实际使用的头像与动作卡预览。觉得取景不合适，可以调整或换一张照片；确认前不会覆盖当前形象。")
+            .font(.caption).foregroundStyle(.secondary)
+        } else {
+          Text("选择后会先预览，可以缩放和移动取景；满意后再生成，不会直接覆盖。")
+            .font(.caption).foregroundStyle(.secondary)
+        }
+        Text("图片不会上传；为再次调整取景，私人数据目录会保留一份本机工作图，导出的备份不包含它。")
           .font(.caption).foregroundStyle(.secondary)
-        Button(model.hasCustomCharacter ? "重新选择照片并生成" : "选择照片并生成动作包…") {
-          model.importCharacterPhoto()
-        }.buttonStyle(.borderedProminent)
+        HStack {
+          if model.hasCustomCharacter {
+            Button(model.canAdjustCharacterPhoto ? "调整取景…" : "重新选择后调整…") {
+              model.adjustCharacterPhoto()
+            }
+          }
+          Button(model.hasCustomCharacter ? "换一张照片…" : "选择照片并预览…") {
+            model.importCharacterPhoto()
+          }.buttonStyle(.borderedProminent)
+        }
       }
       navigation(optionalDone: model.hasCustomCharacter, next: 3)
     }

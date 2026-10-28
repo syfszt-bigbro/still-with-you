@@ -22,6 +22,13 @@ struct PendingHistorySpeakerReview: Identifiable {
   var duplicateCount: Int
 }
 
+struct PendingCharacterPhoto: Identifiable {
+  let id = UUID()
+  let image: NSImage
+  let sourceName: String
+  let initialFraming: CharacterFraming
+}
+
 @MainActor final class AppModel: ObservableObject {
   @Published var state: AppState
   @Published var tab = "今天"
@@ -46,6 +53,9 @@ struct PendingHistorySpeakerReview: Identifiable {
   @Published var learningStatus = ""
   @Published var pendingHistorySpeakerReview: PendingHistorySpeakerReview?
   @Published var historySpeakerDetectionBusy = false
+  @Published var pendingCharacterPhoto: PendingCharacterPhoto?
+  @Published var characterBusy = false
+  @Published private(set) var characterAssetRevision = UUID()
   private var historySpeakerReviewRevision = UUID()
   var learningRevision = UUID()
   var learningAttemptAt = Date.distantPast
@@ -554,22 +564,85 @@ struct PendingHistorySpeakerReview: Identifiable {
     FileManager.default.fileExists(
       atPath: directory.appendingPathComponent("character/custom-spritesheet.png").path)
   }
+  var canAdjustCharacterPhoto: Bool {
+    FileManager.default.fileExists(
+      atPath: directory.appendingPathComponent("character/source-private.png").path)
+  }
+  var characterAvatarURL: URL {
+    directory.appendingPathComponent("character/custom-avatar.png")
+  }
+  func characterActionURL(_ action: String) -> URL {
+    directory.appendingPathComponent("character/actions/\(action).png")
+  }
   func importCharacterPhoto() {
     let panel = NSOpenPanel()
-    panel.title = "选择一张照片，生成桌面动画卡"
-    panel.message = "会保留整张照片，并在本机生成头像和 11 组轻动画卡；不会 AI 改姿势，也不会上传原图。"
+    panel.title = "选择一张照片"
+    panel.message = "下一步可以预览、缩放和移动取景；确认前不会覆盖当前桌面形象。"
     panel.allowedContentTypes = [.image]
     panel.allowsMultipleSelection = false
     panel.canChooseDirectories = false
     guard panel.runModal() == .OK, let url = panel.url else { return }
+    guard let image = NSImage(contentsOf: url), image.size.width > 0, image.size.height > 0 else {
+      notice = "图片处理失败：无法读取这张图片。"
+      return
+    }
+    pendingCharacterPhoto = PendingCharacterPhoto(
+      image: image, sourceName: url.lastPathComponent, initialFraming: CharacterFraming())
+  }
+  func adjustCharacterPhoto() {
+    let sourceURL = directory.appendingPathComponent("character/source-private.png")
+    guard let image = NSImage(contentsOf: sourceURL) else {
+      notice = "这套动作包来自旧版本，没有可调整的本机工作图；请重新选择原照片。"
+      importCharacterPhoto()
+      return
+    }
+    let manifestURL = directory.appendingPathComponent("character/manifest.json")
+    let framing = (try? Data(contentsOf: manifestURL))
+      .flatMap { try? JSONDecoder().decode(CharacterAssetManifest.self, from: $0) }
+      .flatMap(\.framing) ?? CharacterFraming()
+    pendingCharacterPhoto = PendingCharacterPhoto(
+      image: image, sourceName: "当前本机工作图", initialFraming: framing)
+  }
+  func commitCharacterPhoto(_ pending: PendingCharacterPhoto, framing: CharacterFraming) {
+    guard !characterBusy else { return }
+    characterBusy = true
+    let fm = FileManager.default
+    let stagingRoot = directory.appendingPathComponent(
+      ".character-staging-\(UUID().uuidString)", isDirectory: true)
+    defer {
+      try? fm.removeItem(at: stagingRoot)
+      characterBusy = false
+    }
     do {
-      let manifest = try CharacterAssetBuilder.build(from: url, in: directory)
+      let manifest = try CharacterAssetBuilder.build(
+        from: pending.image, framing: framing, in: stagingRoot)
+      try installCharacterAssets(from: stagingRoot)
       state.preferences.desktopCharacterID = "custom"
       if state.onboarding == nil { state.onboarding = OnboardingState() }
       state.onboarding?.photoConfigured = true
+      pendingCharacterPhoto = nil
+      characterAssetRevision = UUID()
       save(); refreshPet?()
-      notice = "已换成这张照片，并生成 \(manifest.actions.count) 组轻动画卡。原照片没有复制进应用资料库。"
+      notice = "已按预览取景生成 \(manifest.actions.count) 组轻动画卡。私密工作图只保存在本机，方便以后再次调整。"
     } catch { notice = "图片处理失败：\(error.localizedDescription)" }
+  }
+  private func installCharacterAssets(from stagingRoot: URL) throws {
+    let fm = FileManager.default
+    let generated = stagingRoot.appendingPathComponent("character", isDirectory: true)
+    let destination = directory.appendingPathComponent("character", isDirectory: true)
+    let backup = directory.appendingPathComponent(
+      ".character-backup-\(UUID().uuidString)", isDirectory: true)
+    let hadExisting = fm.fileExists(atPath: destination.path)
+    if hadExisting { try fm.moveItem(at: destination, to: backup) }
+    do {
+      try fm.moveItem(at: generated, to: destination)
+      if hadExisting { try? fm.removeItem(at: backup) }
+    } catch {
+      if hadExisting, fm.fileExists(atPath: backup.path) {
+        try? fm.moveItem(at: backup, to: destination)
+      }
+      throw error
+    }
   }
   func applyKnowledgeCorrection(_ statement: String, target: CorrectionTarget) {
     let text = statement.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1365,7 +1438,9 @@ struct PendingHistorySpeakerReview: Identifiable {
         for case let item as URL in enumerator {
           guard (try? item.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true else { continue }
           let relative = String(item.path.dropFirst(characterRoot.path.count + 1))
-          if ["png", "json"].contains(item.pathExtension.lowercased()) {
+          if relative != "source-private.png",
+            ["png", "json"].contains(item.pathExtension.lowercased())
+          {
             assets[relative] = try Data(contentsOf: item)
           }
         }
@@ -1373,7 +1448,7 @@ struct PendingHistorySpeakerReview: Identifiable {
       let backup = PortableBackup(state: state, characterFiles: assets)
       _ = try backup.validatedCharacterFiles()
       try e.encode(backup).write(to: url, options: .atomic)
-      notice = "已导出计划、对话、证据记忆、纠正版本和本机生成的动作包（不含密钥与原照片）。"
+      notice = "已导出计划、对话、证据记忆、纠正版本和本机生成的动作包（不含密钥与取景工作图）。"
     } catch { notice = error.localizedDescription }
   }
   func restoreBackup() {
@@ -1420,6 +1495,7 @@ struct PendingHistorySpeakerReview: Identifiable {
       restored.preferences.aiEnabled = false
       if restored.historicalRecords == nil { restored.historicalRecords = library.history }
       learningRevision = UUID()
+      characterAssetRevision = UUID()
       learningSchedule?.cancel(); learningNeedsRefresh = false
       state = restored
       chatMessages = restored.messages

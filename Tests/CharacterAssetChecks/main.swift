@@ -54,15 +54,44 @@ try pngData(source).write(to: sourceURL)
 
 let manifest = try CharacterAssetBuilder.build(from: sourceURL, in: root)
 precondition(manifest.actions.count == 11)
+precondition(manifest.formatVersion == 2)
+precondition(manifest.sourceImage == "source-private.png")
+precondition(manifest.framing == CharacterFraming())
 let character = root.appendingPathComponent("character", isDirectory: true)
 let sheetURL = character.appendingPathComponent(manifest.spriteSheet)
 let avatarURL = character.appendingPathComponent(manifest.avatar)
+let privateSourceURL = character.appendingPathComponent("source-private.png")
 precondition(FileManager.default.fileExists(atPath: sheetURL.path))
+precondition(FileManager.default.fileExists(atPath: privateSourceURL.path))
 precondition(containsFourSourceBands(avatarURL), "avatar cropped away part of the uploaded photo")
 for action in manifest.actions {
   let actionURL = character.appendingPathComponent("actions/\(action).png")
   precondition(FileManager.default.fileExists(atPath: actionURL.path))
   precondition(containsFourSourceBands(actionURL), "\(action) cropped away part of the uploaded photo")
 }
-print("PASS: generated avatar and 11 actions preserve the complete uploaded photo")
+
+let originalAvatar = try Data(contentsOf: avatarURL)
+let adjusted = CharacterFraming(zoom: 2.2, horizontal: 0.7, vertical: -0.4)
+let adjustedManifest = try CharacterAssetBuilder.build(
+  from: sourceURL, framing: adjusted, in: root)
+precondition(adjustedManifest.framing == adjusted)
+let adjustedAvatar = try Data(contentsOf: avatarURL)
+precondition(adjustedAvatar != originalAvatar,
+  "changing the framing did not change the generated avatar")
+let decoded = try JSONDecoder().decode(
+  CharacterAssetManifest.self,
+  from: Data(contentsOf: character.appendingPathComponent("manifest.json")))
+precondition(decoded.framing == adjusted)
+precondition(decoded.sourceImage == "source-private.png")
+
+let clamped = CharacterFraming(zoom: 9, horizontal: -8, vertical: 4).clamped
+precondition(clamped == CharacterFraming(zoom: 3, horizontal: -1, vertical: 1))
+let framedPreview = CharacterAssetBuilder.framedPreview(
+  from: source, framing: CharacterFraming(), size: 320)
+precondition(framedPreview.size == NSSize(width: 320, height: 320))
+let actionPreview = CharacterAssetBuilder.actionPreview(
+  from: source, framing: adjusted, actionIndex: 3)
+precondition(actionPreview.size == NSSize(width: 192, height: 208))
+
+print("PASS: photo preview, adjustable framing, private source and 11 generated actions")
 if keepPreview { print("PREVIEW: \(root.path)") }

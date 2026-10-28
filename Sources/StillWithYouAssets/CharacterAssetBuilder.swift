@@ -1,17 +1,43 @@
 import AppKit
 import Foundation
 
+public struct CharacterFraming: Codable, Equatable, Sendable {
+  public var zoom: Double
+  public var horizontal: Double
+  public var vertical: Double
+
+  public init(zoom: Double = 1, horizontal: Double = 0, vertical: Double = 0) {
+    self.zoom = zoom
+    self.horizontal = horizontal
+    self.vertical = vertical
+  }
+
+  public var clamped: CharacterFraming {
+    CharacterFraming(
+      zoom: min(3, max(1, zoom)),
+      horizontal: min(1, max(-1, horizontal)),
+      vertical: min(1, max(-1, vertical)))
+  }
+}
+
 public struct CharacterAssetManifest: Codable {
-  public var formatVersion = 1
+  public var formatVersion = 2
   public var createdAt = Date()
   public var actions: [String]
   public var spriteSheet: String
   public var avatar: String
+  public var sourceImage: String?
+  public var framing: CharacterFraming?
 
-  public init(actions: [String], spriteSheet: String, avatar: String) {
+  public init(
+    actions: [String], spriteSheet: String, avatar: String,
+    sourceImage: String? = nil, framing: CharacterFraming? = nil
+  ) {
     self.actions = actions
     self.spriteSheet = spriteSheet
     self.avatar = avatar
+    self.sourceImage = sourceImage
+    self.framing = framing
   }
 }
 
@@ -27,10 +53,23 @@ public enum CharacterAssetBuilder {
     "wait", "think", "review", "look-a", "look-b",
   ]
 
-  public static func build(from sourceURL: URL, in root: URL) throws -> CharacterAssetManifest {
+  public static func build(
+    from sourceURL: URL, framing: CharacterFraming = CharacterFraming(), in root: URL
+  ) throws -> CharacterAssetManifest {
     guard let source = NSImage(contentsOf: sourceURL), source.size.width > 0, source.size.height > 0 else {
       throw CharacterAssetError(message: "无法读取这张图片，请选择 PNG、JPEG、HEIC 或 WebP。")
     }
+    return try build(from: source, framing: framing, in: root)
+  }
+
+  public static func build(
+    from source: NSImage, framing: CharacterFraming = CharacterFraming(), in root: URL
+  ) throws -> CharacterAssetManifest {
+    guard source.size.width > 0, source.size.height > 0 else {
+      throw CharacterAssetError(message: "这张图片没有可用的画面尺寸。")
+    }
+    let framing = framing.clamped
+    let framedSource = framedImage(source, framing: framing, size: 1024)
     let fm = FileManager.default
     let folder = root.appendingPathComponent("character", isDirectory: true)
     let actionFolder = folder.appendingPathComponent("actions", isDirectory: true)
@@ -44,7 +83,7 @@ public enum CharacterAssetBuilder {
     for row in 0..<11 {
       for column in 0..<8 {
         let cell = NSRect(x: column * 192, y: (10 - row) * 208, width: 192, height: 208)
-        draw(source: source, in: cell, row: row, column: column)
+        draw(source: framedSource, in: cell, row: row, column: column)
       }
     }
     sheet.unlockFocus()
@@ -57,7 +96,7 @@ public enum CharacterAssetBuilder {
     avatar.lockFocus()
     NSColor(calibratedRed: 0.91, green: 0.93, blue: 0.94, alpha: 1).setFill()
     NSBezierPath(roundedRect: NSRect(x: 0, y: 0, width: 512, height: 512), xRadius: 112, yRadius: 112).fill()
-    drawAspectFit(source, in: NSRect(x: 34, y: 34, width: 444, height: 444), radius: 72)
+    drawAspectFit(framedSource, in: NSRect(x: 34, y: 34, width: 444, height: 444), radius: 72)
     avatar.unlockFocus()
     let avatarURL = folder.appendingPathComponent("custom-avatar.png")
     try pngData(avatar).write(to: avatarURL, options: .atomic)
@@ -71,20 +110,68 @@ public enum CharacterAssetBuilder {
       image.lockFocus()
       NSColor.clear.setFill()
       NSRect(x: 0, y: 0, width: 192, height: 208).fill()
-      draw(source: source, in: NSRect(x: 0, y: 0, width: 192, height: 208), row: row, column: 0)
+      draw(source: framedSource, in: NSRect(x: 0, y: 0, width: 192, height: 208), row: row, column: 0)
       image.unlockFocus()
       let url = actionFolder.appendingPathComponent(action + ".png")
       try pngData(image).write(to: url, options: .atomic)
       try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
     }
 
+    let sourceURL = folder.appendingPathComponent("source-private.png")
+    try pngData(source).write(to: sourceURL, options: .atomic)
+    try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: sourceURL.path)
+
     let manifest = CharacterAssetManifest(
-      actions: actions, spriteSheet: sheetURL.lastPathComponent, avatar: avatarURL.lastPathComponent)
+      actions: actions, spriteSheet: sheetURL.lastPathComponent, avatar: avatarURL.lastPathComponent,
+      sourceImage: sourceURL.lastPathComponent, framing: framing)
     let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     let manifestURL = folder.appendingPathComponent("manifest.json")
     try encoder.encode(manifest).write(to: manifestURL, options: .atomic)
     try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: manifestURL.path)
     return manifest
+  }
+
+  public static func framedPreview(
+    from source: NSImage, framing: CharacterFraming, size: CGFloat = 420
+  ) -> NSImage {
+    framedImage(source, framing: framing.clamped, size: size)
+  }
+
+  public static func actionPreview(
+    from source: NSImage, framing: CharacterFraming, actionIndex: Int = 0
+  ) -> NSImage {
+    let framedSource = framedImage(source, framing: framing.clamped, size: 1024)
+    let row = min(actions.count - 1, max(0, actionIndex))
+    let image = NSImage(size: NSSize(width: 192, height: 208))
+    image.lockFocus()
+    NSColor.clear.setFill()
+    NSRect(x: 0, y: 0, width: 192, height: 208).fill()
+    draw(source: framedSource, in: NSRect(x: 0, y: 0, width: 192, height: 208), row: row, column: 0)
+    image.unlockFocus()
+    return image
+  }
+
+  private static func framedImage(
+    _ source: NSImage, framing: CharacterFraming, size: CGFloat
+  ) -> NSImage {
+    let output = NSImage(size: NSSize(width: size, height: size))
+    output.lockFocus()
+    NSColor(calibratedRed: 0.94, green: 0.95, blue: 0.96, alpha: 1).setFill()
+    NSRect(x: 0, y: 0, width: size, height: size).fill()
+
+    let baseScale = min(size / source.size.width, size / source.size.height)
+    let scale = baseScale * CGFloat(framing.zoom)
+    let drawSize = NSSize(width: source.size.width * scale, height: source.size.height * scale)
+    let overflowX = max(0, (drawSize.width - size) / 2)
+    let overflowY = max(0, (drawSize.height - size) / 2)
+    let origin = NSPoint(
+      x: (size - drawSize.width) / 2 - overflowX * CGFloat(framing.horizontal),
+      y: (size - drawSize.height) / 2 + overflowY * CGFloat(framing.vertical))
+    source.draw(
+      in: NSRect(origin: origin, size: drawSize), from: .zero,
+      operation: .sourceOver, fraction: 1)
+    output.unlockFocus()
+    return output
   }
 
   private static func draw(source: NSImage, in cell: NSRect, row: Int, column: Int) {
