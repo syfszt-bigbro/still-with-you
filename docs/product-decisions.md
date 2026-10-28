@@ -113,3 +113,13 @@
 - AI 只输出人物描述草案；草案不会自动生效，也不会静默覆盖现有描述。用户必须在独立确认窗口中修改并确认。
 - 没有 API 时仍可导入和确认记录，并可在设置中手动填写；人物描述为空时使用安全、简短、尊重边界的默认行为。
 - 用户确认或手动修改人物描述前，自动保存上一版人物知识，继续支持回滚。
+
+## 2026-10-28：源码调试运行不注册系统通知
+
+**问题**：直接运行 SwiftPM 生成的 `.build/debug/StillWithYou` 裸二进制时，它不在完整 `.app` Bundle 中。macOS 的 `UNUserNotificationCenter.current()` 会因为找不到 LaunchServices bundle proxy 而抛出无法由 Swift 捕获的 Objective-C 异常。
+
+**决定**：
+
+- 只有主 Bundle 是 `.app` 且存在 Bundle Identifier 时才注册、发送或申请系统通知。
+- 裸二进制调试运行继续保留窗口、桌面气泡、声音、聊天和其余功能，只跳过系统通知。
+- 正式构建仍必须通过 `Scripts/build_app.sh` 生成完整 `.app`，发行包中的系统通知功能不变。

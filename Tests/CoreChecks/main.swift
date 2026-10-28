@@ -22,6 +22,15 @@ func XCTAssertThrowsError<T>(_ expression: @autoclosure () throws -> T) {
 }
 
 final class CoreTests {
+  func testSystemNotificationsRequireARealApplicationBundle() {
+    XCTAssertFalse(SystemNotificationAvailability.isAvailable(
+      bundleURL: URL(fileURLWithPath: "/tmp/.build/debug"), bundleIdentifier: nil))
+    XCTAssertFalse(SystemNotificationAvailability.isAvailable(
+      bundleURL: URL(fileURLWithPath: "/tmp/Still With You.app"), bundleIdentifier: nil))
+    XCTAssertTrue(SystemNotificationAvailability.isAvailable(
+      bundleURL: URL(fileURLWithPath: "/tmp/Still With You.app"),
+      bundleIdentifier: "app.stillwithyou.desktop"))
+  }
   func testCompanionClockUsesDeviceTime() {
     let formatter = ISO8601DateFormatter()
     formatter.formatOptions = [.withInternetDateTime]
@@ -123,6 +132,7 @@ final class CoreTests {
 }
 
 let suite = CoreTests()
+suite.testSystemNotificationsRequireARealApplicationBundle()
 suite.testCompanionClockUsesDeviceTime()
 suite.testCompanionSleepCueAndWakeCycleUseChinaTime()
 suite.testTimerStopsAtDeadlineAndDoesNotCompleteTaskAutomatically()

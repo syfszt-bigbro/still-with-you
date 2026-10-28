@@ -1270,6 +1270,7 @@ struct PendingCharacterPhoto: Identifiable {
   }
   func notify(_ text: String, title: String? = nil) {
     if state.preferences.sound { NSSound(named: "Glass")?.play() }
+    guard SystemNotificationAvailability.isAvailable() else { return }
     let content = UNMutableNotificationContent()
     content.title = title ?? "\(companionName) · " + voiceLanguage.format("notification")
     content.body = text
@@ -1278,6 +1279,10 @@ struct PendingCharacterPhoto: Identifiable {
     ) { _ in }
   }
   func requestNotifications() {
+    guard SystemNotificationAvailability.isAvailable() else {
+      notice = "当前是源码调试运行，没有完整 App Bundle；桌面气泡与声音仍可用。请运行 dist/Still With You.app 以启用系统通知。"
+      return
+    }
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) {
       granted, error in
       Task { @MainActor in
