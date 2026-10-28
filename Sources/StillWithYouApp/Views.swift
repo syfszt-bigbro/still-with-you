@@ -85,6 +85,10 @@ struct MainView: View {
         } else { ReflectionView(model: model, task: task, phase: model.reviewPhase) }
       }
     }
+    .sheet(item: $model.pendingHistorySpeakerReview) { review in
+      HistorySpeakerReviewView(model: model, review: review)
+        .interactiveDismissDisabled()
+    }
     .sheet(isPresented: Binding(
       get: { model.state.onboarding?.completed != true },
       set: { _ in }
@@ -93,6 +97,59 @@ struct MainView: View {
   func banner(_ text: String, color: Color) -> some View {
     Text(text).font(.callout).frame(maxWidth: .infinity, alignment: .leading).padding(12)
       .background(color.opacity(0.12))
+  }
+}
+
+private struct HistorySpeakerReviewView: View {
+  @ObservedObject var model: AppModel
+  let review: PendingHistorySpeakerReview
+  @State private var selected: String
+
+  init(model: AppModel, review: PendingHistorySpeakerReview) {
+    self.model = model
+    self.review = review
+    _selected = State(initialValue: review.suggestedSpeaker ?? "")
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      Text("确认历史对话中的对方").font(.title2.weight(.semibold))
+      if review.importedCount > 0 || review.duplicateCount > 0 {
+        Text("本次新增 \(review.importedCount) 条原文，跳过重复 \(review.duplicateCount) 条。没有自动生成描述或总结。")
+          .font(.callout)
+      }
+      Text(review.detectionNote).font(.caption).foregroundStyle(.secondary)
+      if review.candidates.isEmpty {
+        Text("记录中没有明确的说话人字段，无法可靠区分双方。原文仍会保存和搜索，但程序不会猜测谁是对方。")
+          .padding().background(Color.mist, in: RoundedRectangle(cornerRadius: 10))
+        HStack { Spacer(); Button("完成") { model.confirmHistorySpeaker(nil) }.buttonStyle(.borderedProminent) }
+      } else {
+        Picker("选择谁是对方", selection: $selected) {
+          Text("请手动选择").tag("")
+          ForEach(review.candidates) { candidate in
+            Text("\(candidate.name) · \(candidate.messageCount) 条" + (candidate.name == review.suggestedSpeaker ? " · 建议" : ""))
+              .tag(candidate.name)
+          }
+        }.pickerStyle(.radioGroup)
+        DisclosureGroup("查看各说话人样例") {
+          ForEach(review.candidates) { candidate in
+            VStack(alignment: .leading, spacing: 4) {
+              Text("\(candidate.name) · \(candidate.messageCount) 条").font(.subheadline.weight(.semibold))
+              ForEach(Array(candidate.samples.enumerated()), id: \.offset) { _, sample in
+                Text("• \(sample)").font(.caption).textSelection(.enabled)
+              }
+            }.padding(.vertical, 5)
+          }
+        }
+        Text("确认后，对方的原话才会用于口吻学习和你我映射；以后每次导入都会重新让你确认。")
+          .font(.caption).foregroundStyle(.secondary)
+        HStack {
+          Spacer()
+          Button("确认“\(selected)”是对方") { model.confirmHistorySpeaker(selected) }
+            .buttonStyle(.borderedProminent).disabled(selected.isEmpty)
+        }
+      }
+    }.padding(28).frame(width: 560)
   }
 }
 struct TodayView: View {
@@ -802,13 +859,11 @@ struct MemoryView: View {
               Text("• \(item.statement)").font(.caption)
             }
           }
-          DisclosureGroup("查看有证据的关系记忆（\(model.effectiveKnowledge.memories.count)）") {
-            ForEach(model.effectiveKnowledge.memories.filter(\.active).suffix(20)) { memory in
-              VStack(alignment: .leading, spacing: 3) {
-                Text(memory.title).font(.caption.weight(.semibold))
-                Text(memory.summary).font(.caption)
-                Text("原文证据 \(memory.evidence.count) 条").font(.caption2).foregroundStyle(.secondary)
-              }.padding(.vertical, 3)
+          DisclosureGroup("关系记忆总结（\(model.effectiveKnowledge.memories.count)）· 可替换、可删除") {
+            Text("总结是可选卡片，与历史原文分开保存。修改或删除总结不会删除导入的聊天。")
+              .font(.caption).foregroundStyle(.secondary)
+            ForEach(model.effectiveKnowledge.memories.suffix(50)) { memory in
+              RelationshipMemoryEditor(model: model, memory: memory)
             }
           }
           if let versions = model.state.knowledgeVersions, !versions.isEmpty {
@@ -842,8 +897,16 @@ struct MemoryView: View {
             .secondary)
           HStack {
             Button(UIStrings.text("导入历史聊天…")) { model.importHistory() }
+            Button(model.historySpeakerDetectionBusy ? "正在识别说话人…" : "重新识别并选择对方") {
+              model.reviewImportedHistorySpeakers()
+            }.disabled(model.historySpeakerDetectionBusy || model.library.history.isEmpty)
             Text(UIStrings.text("支持 UTF-8 TXT / Markdown / JSON / JSONL，单文件最多 10 MB，重复片段自动跳过。"))
               .font(.caption).foregroundStyle(.secondary)
+          }
+          Text("导入只保存原文，不强制生成总结。记录含明确说话人时，启用 AI 会发送少量名称与样例用于建议；无论建议是什么，最终都由你选择谁是对方。")
+            .font(.caption).foregroundStyle(.secondary)
+          if let speaker = model.state.voiceSpeaker, !speaker.isEmpty {
+            Text("当前确认的对方：\(speaker)").font(.caption.weight(.semibold))
           }
           Text(UIStrings.text("JSON 可用消息数组，每条含 role/content 或 speaker/text；文本按原文分段，保留原有称呼，不计入任务统计。"))
             .font(.caption).foregroundStyle(.secondary)
@@ -883,6 +946,46 @@ struct MemoryView: View {
     }
   }
 }
+
+private struct RelationshipMemoryEditor: View {
+  @ObservedObject var model: AppModel
+  let memory: RelationshipMemory
+  @State private var title: String
+  @State private var summary: String
+
+  init(model: AppModel, memory: RelationshipMemory) {
+    self.model = model
+    self.memory = memory
+    _title = State(initialValue: memory.title)
+    _summary = State(initialValue: memory.summary)
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 7) {
+      Divider()
+      TextField("总结标题", text: $title).textFieldStyle(.roundedBorder)
+      TextField("可替换的总结", text: $summary, axis: .vertical)
+        .lineLimit(2...6).textFieldStyle(.roundedBorder)
+      DisclosureGroup("查看原文证据（\(memory.evidence.count) 条）") {
+        ForEach(Array(memory.evidence.enumerated()), id: \.offset) { _, evidence in
+          Text("• \(evidence.quote)").font(.caption).textSelection(.enabled)
+        }
+      }.font(.caption)
+      HStack {
+        Button("保存替换") {
+          model.replaceRelationshipMemory(memory.id, title: title, summary: summary)
+        }.disabled(
+          title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || (title == memory.title && summary == memory.summary))
+        Button("删除总结", role: .destructive) { model.deleteRelationshipMemory(memory.id) }
+        Spacer()
+        Text("原文独立保留").font(.caption2).foregroundStyle(.secondary)
+      }
+    }.onChange(of: memory.title) { _, value in title = value }
+      .onChange(of: memory.summary) { _, value in summary = value }
+  }
+}
 struct SettingsView: View {
   @ObservedObject var model: AppModel
   @State private var apiKey = ""
@@ -900,7 +1003,7 @@ struct SettingsView: View {
           setupRow(done: model.state.onboarding?.identityCompleted == true, title: "1. 名字与边界", note: "必选")
           setupRow(done: model.hasCustomCharacter, title: "2. 照片与动作包", note: "可选")
           setupRow(done: model.state.onboarding?.memoryConfigured == true, title: "3. 聊天与记忆", note: "可选")
-          setupRow(done: model.state.onboarding?.apiConfigured == true, title: "4. AI API", note: "可选；语音也可不配置")
+          setupRow(done: model.state.onboarding?.apiConfigured == true, title: "4. AI 与语音", note: "均可选；系统朗读无需 Key")
           Text("未完成可选步骤不会影响计划、计时、桌面互动和本机备份。")
             .font(.caption).foregroundStyle(.secondary)
         }
@@ -958,14 +1061,16 @@ struct SettingsView: View {
             ForEach(VoiceLanguage.allCases, id: \.rawValue) { Text($0.label).tag($0.rawValue) }
           }
           Text("人物语言用于对话、彩蛋和系统朗读；界面语言用于按钮和设置，两者独立保存。可用声音取决于这台 Mac 已安装的系统声音。").font(.caption).foregroundStyle(.secondary)
-          Picker(UIStrings.text("历史中哪位是对方"), selection: Binding(get: { model.state.voiceSpeaker ?? "" }, set: { value in
+          Picker(UIStrings.text("已确认的历史对方"), selection: Binding(get: { model.state.voiceSpeaker ?? "" }, set: { value in
             model.state.voiceSpeaker = value.isEmpty ? nil : value
             model.updateVoiceSignature(); model.save()
             Task { await model.refreshVoice() }
           })) {
-            Text(UIStrings.text("自动识别")).tag("")
+            Text(UIStrings.text("暂不指定")).tag("")
             ForEach(Array(Set(model.library.history.map(\.speaker))).sorted(), id: \.self) { Text($0).tag($0) }
           }
+          Text("每次导入后都会先给出识别建议，再由你确认；这里也可以随时改选。")
+            .font(.caption).foregroundStyle(.secondary)
           Text(UIStrings.text("当前学习对象：\(model.styleSpeaker ?? "尚未识别，请选择对方的历史名字")")).font(.caption).foregroundStyle(.secondary)
           Text(UIStrings.text("各栏引导语和提醒按性格生成；有历史时，优先借用对方在相近场景中的常用语。保存、删除等操作名称保持明确。用语在本机缓存，切换页面不会重复请求。"))
             .font(.caption).foregroundStyle(.secondary)
@@ -980,7 +1085,7 @@ struct SettingsView: View {
           Text("桌面照片角色").font(.headline)
           Picker("桌面人物模型", selection: Binding(
             get: { model.state.preferences.desktopCharacterID ?? "default" },
-            set: { model.state.preferences.desktopCharacterID = $0; model.resetDuoSpeechVoiceRotation(); model.save(); model.refreshPet?() }
+            set: { model.state.preferences.desktopCharacterID = $0; model.save(); model.refreshPet?() }
           )) {
             Text("内置抽象形象").tag("default")
             if model.hasCustomCharacter { Text("我的照片动画卡").tag("custom") }

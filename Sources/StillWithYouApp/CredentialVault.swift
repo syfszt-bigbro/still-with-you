@@ -10,7 +10,7 @@ enum CredentialVault {
       let fm = FileManager.default
       let folder = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("StillWithYou/Credentials", isDirectory: true)
-      let helper = "credential-vault-v1"
+      let helper = "credential-vault-v2"
       let executable = folder.appendingPathComponent(helper)
       if !fm.fileExists(atPath: executable.path) {
         guard let bundled = Bundle.main.url(forResource: helper, withExtension: nil) else {

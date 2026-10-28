@@ -21,10 +21,12 @@ func containsFourSourceBands(_ url: URL) -> Bool {
       guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
         color.alphaComponent > 0.7 else { continue }
       let r = color.redComponent, g = color.greenComponent, b = color.blueComponent
-      if r > 0.75, g < 0.35, b < 0.35 { found.insert("red") }
-      if g > 0.65, r < 0.35, b < 0.35 { found.insert("green") }
-      if b > 0.7, r < 0.35, g < 0.45 { found.insert("blue") }
-      if r > 0.75, g > 0.65, b < 0.35 { found.insert("yellow") }
+      // Display-P3 images converted by AppKit can give pure green a red
+      // component around 0.5. Detect dominant bands instead of assuming sRGB.
+      if r > 0.75, r > g + 0.45, r > b + 0.45 { found.insert("red") }
+      if g > 0.65, g > r + 0.25, g > b + 0.25 { found.insert("green") }
+      if b > 0.7, b > r + 0.35, b > g + 0.35 { found.insert("blue") }
+      if r > 0.75, g > 0.65, b < min(r, g) - 0.35 { found.insert("yellow") }
     }
   }
   return found.count == 4

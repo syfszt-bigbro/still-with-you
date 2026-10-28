@@ -28,9 +28,10 @@ import StillWithYouCore
     model.publishSpokenReply(ChatMessage(role: "assistant", content: "文字仍然可见"))
     precondition(model.state.messages.count == count + 1)
     precondition(model.preparingSpeech && model.clonedSpeech.busy)
-    var revealed = false
-    model.clonedSpeech.speak("不得替换", onReady: { revealed = true })
-    precondition(revealed && model.clonedSpeech.busy)
+    var rejected = false
+    model.clonedSpeech.speak(
+      "不得替换", voice: "test-voice", onFailure: { _ in rejected = true })
+    precondition(rejected && model.clonedSpeech.busy)
     model.preparingSpeech = false
     model.clonedSpeech.busy = false
     model.reviewID = UUID()

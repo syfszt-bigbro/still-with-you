@@ -997,6 +997,67 @@ do {
   print("PASS: portable backup carries generated assets and rejects path traversal")
 }
 
+// Public seam: importing raw dialogue never requires or silently creates a
+// summary. Every import returns the detected speakers for explicit confirmation.
+do {
+  let existingMemory = RelationshipMemory(
+    title: "手动保留", summary: "这是用户已经确认过的总结",
+    evidence: [MemoryEvidence(sourceID: "old", quote: "旧证据")])
+  let knowledge = CompanionKnowledge(memories: [existingMemory])
+  let incoming = [
+    HistoricalMessage(id: "n1", timestamp: "2026-01-01 10:00", speaker: "用户乙", text: "吃饭没"),
+    HistoricalMessage(id: "n2", timestamp: "2026-01-01 10:01", speaker: "陪伴者甲", text: "刚吃"),
+    HistoricalMessage(id: "n3", timestamp: "2026-01-01 10:02", speaker: "陪伴者甲", text: "你呢"),
+  ]
+  var importedProfile = CompanionProfile()
+  importedProfile.name = "陪伴者甲"; importedProfile.userName = "用户乙"; importedProfile.description = ""
+  let result = HistoryImportPolicy.importing(
+    incoming, into: [], knowledge: knowledge, profile: importedProfile)
+  precondition(result.records.count == 3)
+  precondition(result.knowledge == knowledge)
+  precondition(result.speakers.map(\.name) == ["陪伴者甲", "用户乙"])
+  precondition(result.speakers.map(\.messageCount) == [2, 1])
+  precondition(result.suggestedSpeaker == "陪伴者甲")
+  precondition(HistoryImportPolicy.localSuggestion(
+    candidates: result.speakers, profile: CompanionProfile()) == nil)
+  let aiChoice = try HistoryImportPolicy.validatedAIChoice(
+    "{\"speaker\":\"用户乙\"}", candidates: result.speakers)
+  precondition(aiChoice == "用户乙")
+  XCTAssertThrowsError(try HistoryImportPolicy.validatedAIChoice(
+    "{\"speaker\":\"不存在\"}", candidates: result.speakers))
+  print("PASS: raw history stays separate from summaries and every import exposes speaker confirmation")
+}
+
+// Public seam: generated or hand-written relationship summaries are optional
+// user-owned cards. They can be replaced or deleted without touching raw history.
+do {
+  let memory = RelationshipMemory(
+    title: "旧标题", summary: "旧总结", keywords: ["旧"],
+    evidence: [MemoryEvidence(sourceID: "raw-1", quote: "保留的历史原文")])
+  let original = CompanionKnowledge(memories: [memory])
+  let replaced = try CompanionKnowledgeHistory.replacingMemory(
+    memory.id, title: "新标题", summary: "新总结", in: original, versions: [])
+  precondition(replaced.knowledge.memories[0].title == "新标题")
+  precondition(replaced.knowledge.memories[0].summary == "新总结")
+  precondition(replaced.knowledge.memories[0].evidence == memory.evidence)
+  precondition(replaced.versions.last?.snapshot == original)
+  let deleted = try CompanionKnowledgeHistory.deletingMemory(
+    memory.id, in: replaced.knowledge, versions: replaced.versions)
+  precondition(deleted.knowledge.memories.isEmpty)
+  precondition(deleted.versions.count == 2)
+  print("PASS: relationship summaries can be replaced or deleted while raw evidence remains independent")
+}
+
+// Public seam: system speech remains the no-key default, while a user-supplied
+// Bailian voice ID selects cloud synthesis. Missing IDs safely fall back.
+do {
+  precondition(SpeechRouting.resolve(cloudEnabled: false, voiceID: nil) == .system)
+  precondition(SpeechRouting.resolve(cloudEnabled: true, voiceID: "  ") == .system)
+  precondition(SpeechRouting.resolve(
+    cloudEnabled: true, voiceID: "custom-voice-123") == .bailian(voiceID: "custom-voice-123"))
+  print("PASS: speech routing supports system and user-configured Bailian voices with safe fallback")
+}
+
 // Public seam: replacing a generated custom character at the same path must
 // invalidate the desktop cache. The picker value remains "custom", so the
 // cache key has to reflect the file contents rather than only the selection.

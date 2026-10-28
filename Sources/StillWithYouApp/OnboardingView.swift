@@ -86,12 +86,12 @@ struct OnboardingView: View {
   private var memoryStep: some View {
     VStack(alignment: .leading, spacing: 18) {
       setupHeader("步骤 3 · 聊天与记忆", required: false,
-        detail: "导入 TXT、Markdown、JSON 或 JSONL。程序只把有原文证据的片段做成记忆卡。")
+        detail: "导入 TXT、Markdown、JSON 或 JSONL。原文与可选总结分开保存；导入后由你确认聊天中的哪一位是对方。")
       Card {
-        Label("\(model.state.historicalRecords?.count ?? 0) 条原始片段 · \(model.effectiveKnowledge.memories.count) 张记忆卡",
+        Label("\(model.state.historicalRecords?.count ?? 0) 条原始片段 · \(model.effectiveKnowledge.memories.count) 张可选总结",
           systemImage: "text.book.closed")
           .font(.headline)
-        Text("人格先决定如何回应，关系记忆只在本轮相关时出现。纠正会立即生效，并自动保留可回滚版本。")
+        Text("导入不会强制生成描述或总结。AI 可以给出说话人建议，但必须由你确认；已有总结可在“记忆”页替换或删除，原文不受影响。")
           .font(.caption).foregroundStyle(.secondary)
         Button("导入聊天记录…") { model.importHistory() }.buttonStyle(.borderedProminent)
       }
@@ -137,6 +137,7 @@ struct OnboardingView: View {
         Text("测试会发送一句最短请求，可能产生极少量 API 费用。密钥只保存在 macOS 钥匙串，不进入备份。")
           .font(.caption).foregroundStyle(.secondary)
       }
+      ClonedSpeechSettings(model: model, voice: model.clonedSpeech)
       Card {
         Text("写在最后").font(.title3.weight(.semibold))
         Text("你喜欢过的人，不论你们有没有真正走到一起，也不论那段同行持续了多久，都可能在你身上留下不可磨灭的痕迹。\n\n这个程序不是为了把谁困在过去，也不是让一段模拟替代真实的人。它只是帮你把那些聊天、照片、习惯和片段妥善收好，让你有机会看清：那段情感给过你什么，你又因此成为了怎样的人。\n\n我们不应把记忆变成执念。真正好的情感，即使没有结局，也应当让人更坦荡、更温柔、更有勇气向前。愿你保存那些照亮过你的部分，也把自己带往更明亮的生活。\n\n这就是“她一直都在”的初衷：不是让她永远停在这里，而是让被她改变过的你，继续向阳而行。")

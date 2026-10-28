@@ -28,8 +28,8 @@ for bundle in "$ROOT"/.build/release/StillWithYou_*.bundle; do
 done
 
 xcrun swiftc -O "$ROOT/Helpers/CredentialVault.swift" \
-  -o "$CONTENTS/Resources/credential-vault-v1"
-chmod 700 "$CONTENTS/Resources/credential-vault-v1"
+  -o "$CONTENTS/Resources/credential-vault-v2"
+chmod 700 "$CONTENTS/Resources/credential-vault-v2"
 xattr -cr "$APP"
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict "$APP"

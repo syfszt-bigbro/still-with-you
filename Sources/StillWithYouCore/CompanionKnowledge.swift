@@ -113,6 +113,16 @@ public struct CompanionKnowledgeVersion: Codable, Identifiable, Equatable, Senda
 }
 
 public enum CompanionKnowledgeHistory {
+  public enum EditError: LocalizedError {
+    case memoryNotFound, emptySummary
+    public var errorDescription: String? {
+      switch self {
+      case .memoryNotFound: return "找不到这条关系记忆。"
+      case .emptySummary: return "标题和总结不能为空；如不需要请直接删除。"
+      }
+    }
+  }
+
   public static func applying(
     _ correction: CompanionCorrection, to knowledge: CompanionKnowledge,
     versions: [CompanionKnowledgeVersion], reason: String
@@ -131,10 +141,42 @@ public enum CompanionKnowledgeHistory {
     let archive = CompanionKnowledgeVersion(reason: "回滚前自动存档", snapshot: current)
     return (version.snapshot, Array((versions + [archive]).suffix(20)))
   }
+
+  public static func replacingMemory(
+    _ id: UUID, title: String, summary: String, in knowledge: CompanionKnowledge,
+    versions: [CompanionKnowledgeVersion]
+  ) throws -> (knowledge: CompanionKnowledge, versions: [CompanionKnowledgeVersion]) {
+    let cleanTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+    let cleanSummary = summary.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !cleanTitle.isEmpty, !cleanSummary.isEmpty else { throw EditError.emptySummary }
+    guard let index = knowledge.memories.firstIndex(where: { $0.id == id }) else {
+      throw EditError.memoryNotFound
+    }
+    var updated = knowledge
+    updated.memories[index].title = String(cleanTitle.prefix(120))
+    updated.memories[index].summary = String(cleanSummary.prefix(1000))
+    updated.memories[index].keywords = CompanionKnowledgeBuilder.keywords(
+      cleanTitle + " " + cleanSummary)
+    let archive = CompanionKnowledgeVersion(reason: "替换关系记忆总结", snapshot: knowledge)
+    return (updated, Array((versions + [archive]).suffix(20)))
+  }
+
+  public static func deletingMemory(
+    _ id: UUID, in knowledge: CompanionKnowledge,
+    versions: [CompanionKnowledgeVersion]
+  ) throws -> (knowledge: CompanionKnowledge, versions: [CompanionKnowledgeVersion]) {
+    guard knowledge.memories.contains(where: { $0.id == id }) else {
+      throw EditError.memoryNotFound
+    }
+    var updated = knowledge
+    updated.memories.removeAll { $0.id == id }
+    let archive = CompanionKnowledgeVersion(reason: "删除关系记忆总结", snapshot: knowledge)
+    return (updated, Array((versions + [archive]).suffix(20)))
+  }
 }
 
 public enum CompanionKnowledgeBuilder {
-  private static func keywords(_ text: String) -> [String] {
+  public static func keywords(_ text: String) -> [String] {
     let normalized = text.lowercased().filter { $0.isLetter || $0.isNumber }
     let characters = Array(normalized)
     var terms: [String] = []

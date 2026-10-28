@@ -1,13 +1,15 @@
 import Foundation
 import Security
 
-// Stable executable identity: ship v1 unchanged across ordinary app updates.
+// Stable executable identity: v2 adds the optional cloud-speech account while
+// retaining the same Keychain service so existing chat keys remain readable.
 // Secrets travel only through anonymous pipes, never arguments or files.
 struct Request: Decodable { let action: String; let account: String; let value: String? }
 struct Reply: Encodable { let status: Int32; let value: String? }
 func run() -> Reply {
   guard let request = try? JSONDecoder().decode(Request.self, from: FileHandle.standardInput.readDataToEndOfFile()),
-    request.account == "chat-api" || request.account.hasPrefix("verification-") else {
+    request.account == "chat-api" || request.account == "cosyvoice"
+      || request.account.hasPrefix("verification-") else {
     return Reply(status: errSecParam, value: nil)
   }
   let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
