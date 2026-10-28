@@ -45,6 +45,10 @@ public enum CharacterVoice {
     "footer": ["陪你", "我在", "慢慢"]
   ]
   public static func speaker(history: [HistoricalMessage], profile: CompanionProfile, selected: String?) -> String? {
+    let confirmed = HistorySpeakerAssignment.confirmedNames(in: history)
+    if !confirmed.isEmpty { return confirmed.joined(separator: "、") }
+    if history.contains(where: { $0.isCompanion != nil }) ||
+      !HistorySpeakerAssignment.unresolved(in: history).isEmpty { return nil }
     let names = Set(history.map(\.speaker))
     if let selected, !selected.isEmpty { return names.contains(selected) ? selected : nil }
     if names.contains(profile.displayName) { return profile.displayName }
@@ -54,8 +58,12 @@ public enum CharacterVoice {
     return other.count == 1 ? other.first : nil
   }
   public static func samples(scene: String, history: [HistoricalMessage], speaker: String?) -> [String] {
-    guard let speaker else { return [] }
-    let counts = history.filter { $0.speaker == speaker }.reduce(into: [String: Int]()) { result, message in
+    let hasAssignments = history.contains { $0.isCompanion != nil }
+    guard hasAssignments || speaker != nil else { return [] }
+    let eligible = history.filter { message in
+      hasAssignments ? message.isCompanion == true : message.speaker == speaker
+    }
+    let counts = eligible.reduce(into: [String: Int]()) { result, message in
       let text = message.text.trimmingCharacters(in: .whitespacesAndNewlines)
       guard (2...100).contains(text.count), !text.contains("\n"), !text.contains("http"), !text.contains("@") else { return }
       result[text, default: 0] += 1

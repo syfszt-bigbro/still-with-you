@@ -83,3 +83,59 @@ public enum HistoryImportPolicy {
     return speaker
   }
 }
+
+/// Stores the user's speaker decision on the imported rows rather than in one
+/// global label. This preserves aliases across files (`她`, `assistant`, etc.)
+/// and keeps unreviewed imports out of persona learning.
+public enum HistorySpeakerAssignment {
+  private static let ignored = Set(["", "system", "历史原文", "模型"])
+
+  public static func markingPending(
+    _ records: [HistoricalMessage], imported: [HistoricalMessage]
+  ) -> [HistoricalMessage] {
+    let keys = Set(imported.map(\.duplicateKey))
+    return records.map { row in
+      var copy = row
+      if keys.contains(row.duplicateKey) { copy.isCompanion = nil }
+      return copy
+    }
+  }
+
+  public static func confirming(
+    _ selected: String?, candidates: Set<String>, recordKeys: Set<String>,
+    in records: [HistoricalMessage]
+  ) -> [HistoricalMessage] {
+    records.map { row in
+      var copy = row
+      if recordKeys.contains(row.duplicateKey), candidates.contains(row.speaker) {
+        copy.isCompanion = selected.map { row.speaker == $0 } ?? false
+      }
+      return copy
+    }
+  }
+
+  /// Used by an explicit re-review: confirming another historical label adds an
+  /// alias without revoking labels the user already approved in other files.
+  public static func addingCompanionAlias(
+    _ selected: String, recordKeys: Set<String>, in records: [HistoricalMessage]
+  ) -> [HistoricalMessage] {
+    records.map { row in
+      var copy = row
+      if recordKeys.contains(row.duplicateKey), row.speaker == selected {
+        copy.isCompanion = true
+      }
+      return copy
+    }
+  }
+
+  public static func confirmedNames(in records: [HistoricalMessage]) -> [String] {
+    Array(Set(records.filter { $0.isCompanion == true }.map(\.speaker))).sorted()
+  }
+
+  public static func unresolved(in records: [HistoricalMessage]) -> [HistoricalMessage] {
+    records.filter {
+      $0.isCompanion == nil && !ignored.contains(
+        $0.speaker.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
+    }
+  }
+}

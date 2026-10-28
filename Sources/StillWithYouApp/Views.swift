@@ -85,7 +85,14 @@ struct MainView: View {
         } else { ReflectionView(model: model, task: task, phase: model.reviewPhase) }
       }
     }
-    .sheet(item: $model.pendingHistorySpeakerReview) { review in
+    .sheet(item: Binding(
+      get: {
+        model.state.onboarding?.completed == true ? model.pendingHistorySpeakerReview : nil
+      },
+      set: { value in
+        if model.state.onboarding?.completed == true { model.pendingHistorySpeakerReview = value }
+      }
+    )) { review in
       HistorySpeakerReviewView(model: model, review: review)
         .interactiveDismissDisabled()
     }
@@ -100,7 +107,7 @@ struct MainView: View {
   }
 }
 
-private struct HistorySpeakerReviewView: View {
+struct HistorySpeakerReviewView: View {
   @ObservedObject var model: AppModel
   let review: PendingHistorySpeakerReview
   @State private var selected: String
@@ -141,7 +148,9 @@ private struct HistorySpeakerReviewView: View {
             }.padding(.vertical, 5)
           }
         }
-        Text("确认后，对方的原话才会用于口吻学习和你我映射；以后每次导入都会重新让你确认。")
+        Text(review.preservesConfirmedAliases
+          ? "这次确认只会追加一个历史名称，不会移除你以前确认过的名称。"
+          : "确认后，对方的原话才会用于口吻学习和你我映射；以后每次导入都会重新让你确认。")
           .font(.caption).foregroundStyle(.secondary)
         HStack {
           Spacer()
@@ -897,7 +906,8 @@ struct MemoryView: View {
             .secondary)
           HStack {
             Button(UIStrings.text("导入历史聊天…")) { model.importHistory() }
-            Button(model.historySpeakerDetectionBusy ? "正在识别说话人…" : "重新识别并选择对方") {
+              .disabled(model.historySpeakerDetectionBusy)
+            Button(model.historySpeakerDetectionBusy ? "正在识别说话人…" : "重新识别并添加对方名称") {
               model.reviewImportedHistorySpeakers()
             }.disabled(model.historySpeakerDetectionBusy || model.library.history.isEmpty)
             Text(UIStrings.text("支持 UTF-8 TXT / Markdown / JSON / JSONL，单文件最多 10 MB，重复片段自动跳过。"))
@@ -905,8 +915,9 @@ struct MemoryView: View {
           }
           Text("导入只保存原文，不强制生成总结。记录含明确说话人时，启用 AI 会发送少量名称与样例用于建议；无论建议是什么，最终都由你选择谁是对方。")
             .font(.caption).foregroundStyle(.secondary)
-          if let speaker = model.state.voiceSpeaker, !speaker.isEmpty {
-            Text("当前确认的对方：\(speaker)").font(.caption.weight(.semibold))
+          if !model.confirmedHistorySpeakers.isEmpty {
+            Text("已确认属于对方的历史名称：\(model.confirmedHistorySpeakers.joined(separator: "、"))")
+              .font(.caption.weight(.semibold))
           }
           Text(UIStrings.text("JSON 可用消息数组，每条含 role/content 或 speaker/text；文本按原文分段，保留原有称呼，不计入任务统计。"))
             .font(.caption).foregroundStyle(.secondary)
@@ -1022,6 +1033,7 @@ struct SettingsView: View {
           HStack {
             Button(UIStrings.text("保存人物设置")) { model.saveProfile(profile); profile = model.profile }.buttonStyle(.borderedProminent)
             Button(UIStrings.text("导入历史聊天…")) { model.importHistory() }
+              .disabled(model.historySpeakerDetectionBusy)
           }
         }
 
@@ -1061,15 +1073,10 @@ struct SettingsView: View {
             ForEach(VoiceLanguage.allCases, id: \.rawValue) { Text($0.label).tag($0.rawValue) }
           }
           Text("人物语言用于对话、彩蛋和系统朗读；界面语言用于按钮和设置，两者独立保存。可用声音取决于这台 Mac 已安装的系统声音。").font(.caption).foregroundStyle(.secondary)
-          Picker(UIStrings.text("已确认的历史对方"), selection: Binding(get: { model.state.voiceSpeaker ?? "" }, set: { value in
-            model.state.voiceSpeaker = value.isEmpty ? nil : value
-            model.updateVoiceSignature(); model.save()
-            Task { await model.refreshVoice() }
-          })) {
-            Text(UIStrings.text("暂不指定")).tag("")
-            ForEach(Array(Set(model.library.history.map(\.speaker))).sorted(), id: \.self) { Text($0).tag($0) }
-          }
-          Text("每次导入后都会先给出识别建议，再由你确认；这里也可以随时改选。")
+          Text("已确认属于对方的历史名称：" + (model.confirmedHistorySpeakers.isEmpty
+            ? "尚未确认" : model.confirmedHistorySpeakers.joined(separator: "、")))
+            .font(.subheadline)
+          Text("每次导入后都会先给出识别建议，再由你确认。不同文件里的“她”“assistant”或昵称会分别保存，不会覆盖以前的确认。")
             .font(.caption).foregroundStyle(.secondary)
           Text(UIStrings.text("当前学习对象：\(model.styleSpeaker ?? "尚未识别，请选择对方的历史名字")")).font(.caption).foregroundStyle(.secondary)
           Text(UIStrings.text("各栏引导语和提醒按性格生成；有历史时，优先借用对方在相近场景中的常用语。保存、删除等操作名称保持明确。用语在本机缓存，切换页面不会重复请求。"))

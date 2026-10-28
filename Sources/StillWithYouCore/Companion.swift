@@ -75,8 +75,12 @@ public struct HistoricalMessage: Codable, Identifiable, Sendable {
   public var speaker: String
   public var kind: String
   public var text: String
-  public init(id: String = UUID().uuidString, timestamp: String = "", speaker: String = "历史原文", kind: String = "text_or_mixed", text: String) {
+  /// `nil` means this imported row has not been reviewed yet. This is stored on
+  /// each row so different exports may use different labels for the same person.
+  public var isCompanion: Bool?
+  public init(id: String = UUID().uuidString, timestamp: String = "", speaker: String = "历史原文", kind: String = "text_or_mixed", text: String, isCompanion: Bool? = nil) {
     self.id = id; self.timestamp = timestamp; self.speaker = speaker; self.kind = kind; self.text = text
+    self.isCompanion = isCompanion
   }
   public var duplicateKey: String { "\(timestamp)\u{0}\(speaker)\u{0}\(text)" }
 }
@@ -117,11 +121,72 @@ public enum HistoryImporter {
       } catch let error as HistoryImportError { throw error }
       catch { throw HistoryImportError.invalid("JSON 格式不正确；没有导入任何内容。") }
     } else if ["txt", "md", "markdown"].contains(ext) {
-      records = chunks(text).map { HistoricalMessage(text: $0) }
+      records = parseLabeledText(text) ?? chunks(text).map { HistoricalMessage(text: $0) }
     } else { throw HistoryImportError.invalid("支持 TXT、Markdown、JSON 和 JSONL 文件。") }
     guard !records.isEmpty else { throw HistoryImportError.invalid("文件没有可导入的消息。") }
     return records
   }
+
+  /// Recognizes simple exported transcripts such as `我：你好` / `她: 在呢`.
+  /// Ordinary notes keep their original, unlabeled form unless at least two
+  /// distinct conversational speakers are present.
+  private static func parseLabeledText(_ text: String) -> [HistoricalMessage]? {
+    struct Section { var speaker: String; var lines: [String] }
+    var sections: [Section] = []
+    var current = Section(speaker: "历史原文", lines: [])
+    var speakers = Set<String>()
+
+    func flush() {
+      let body = current.lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+      if !body.isEmpty { sections.append(Section(speaker: current.speaker, lines: [body])) }
+      current.lines.removeAll(keepingCapacity: true)
+    }
+
+    for rawLine in text.split(separator: "\n", omittingEmptySubsequences: false) {
+      let line = String(rawLine).trimmingCharacters(in: CharacterSet(charactersIn: "\r"))
+      if let labeled = labeledLine(line) {
+        flush()
+        current.speaker = labeled.speaker
+        current.lines = labeled.body.isEmpty ? [] : [labeled.body]
+        speakers.insert(labeled.speaker)
+      } else {
+        current.lines.append(line)
+      }
+    }
+    flush()
+
+    guard speakers.count >= 2 else { return nil }
+    return sections.flatMap { section in
+      chunks(section.lines.joined(separator: "\n")).map {
+        HistoricalMessage(speaker: section.speaker, text: $0)
+      }
+    }
+  }
+
+  private static func labeledLine(_ rawLine: String) -> (speaker: String, body: String)? {
+    var line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
+    while let prefix = ["> ", "- ", "* ", "+ "].first(where: { line.hasPrefix($0) }) {
+      line.removeFirst(prefix.count)
+      line = line.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    guard !line.hasPrefix("#"),
+      let colon = line.firstIndex(where: { $0 == "：" || $0 == ":" }) else { return nil }
+    let speaker = String(line[..<colon]).trimmingCharacters(in: .whitespacesAndNewlines)
+    let bodyStart = line.index(after: colon)
+    let body = String(line[bodyStart...]).trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !speaker.isEmpty, speaker.count <= 80 else { return nil }
+
+    let lower = speaker.lowercased()
+    let metadata = Set(["标题", "日期", "时间", "地点", "作者", "摘要", "备注", "title", "date", "time", "location", "author", "summary", "note"])
+    guard !metadata.contains(lower),
+      !lower.hasPrefix("http"), !lower.hasPrefix("www."), !speaker.contains("/") else { return nil }
+    let hasNameCharacter = speaker.unicodeScalars.contains {
+      CharacterSet.letters.contains($0) || CharacterSet(charactersIn: "我你他她它咱俺用户对方").contains($0)
+    }
+    guard hasNameCharacter else { return nil }
+    return (speaker, body)
+  }
+
   private static func chunks(_ text: String) -> [String] {
     var output: [String] = []
     var remainder = text[...]

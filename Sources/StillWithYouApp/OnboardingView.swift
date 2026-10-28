@@ -41,6 +41,10 @@ struct OnboardingView: View {
     .background(Color.mist)
     .onAppear { profile = model.profile }
     .interactiveDismissDisabled(true)
+    .sheet(item: $model.pendingHistorySpeakerReview) { review in
+      HistorySpeakerReviewView(model: model, review: review)
+        .interactiveDismissDisabled()
+    }
   }
 
   private var identityStep: some View {
@@ -93,7 +97,8 @@ struct OnboardingView: View {
           .font(.headline)
         Text("导入不会强制生成描述或总结。AI 可以给出说话人建议，但必须由你确认；已有总结可在“记忆”页替换或删除，原文不受影响。")
           .font(.caption).foregroundStyle(.secondary)
-        Button("导入聊天记录…") { model.importHistory() }.buttonStyle(.borderedProminent)
+        Button("导入聊天记录…") { model.importHistory() }
+          .buttonStyle(.borderedProminent).disabled(model.historySpeakerDetectionBusy)
       }
       navigation(optionalDone: setup.memoryConfigured, next: 4)
     }

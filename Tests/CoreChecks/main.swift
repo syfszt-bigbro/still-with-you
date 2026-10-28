@@ -160,6 +160,36 @@ XCTAssertEqual(HistoryImporter.merging(imported, into: imported).count, 2)
 let markdown = try HistoryImporter.parse(data: Data(("# 一段历史\n我：今天去散步了。\n她：真好。\n" + String(repeating: "文字", count: 1200)).utf8), fileExtension: "md")
 XCTAssertTrue(markdown.count >= 3)
 XCTAssertTrue(markdown.allSatisfy { $0.text.count <= 1000 })
+XCTAssertTrue(markdown.contains { $0.speaker == "我" && $0.text.contains("今天去散步了") })
+XCTAssertTrue(markdown.contains { $0.speaker == "她" && $0.text.contains("真好") })
+XCTAssertEqual(Set(HistoryImportPolicy.candidates(in: markdown).map(\.name)), Set(["我", "她"]))
+let plainNotes = try HistoryImporter.parse(
+  data: Data("标题：今天的记录\n地点：上海\n这里只是普通笔记。".utf8), fileExtension: "txt")
+XCTAssertEqual(Set(plainNotes.map(\.speaker)), Set(["历史原文"]))
+var firstBatch = [
+  HistoricalMessage(speaker: "我", text: "到家了"),
+  HistoricalMessage(speaker: "她", text: "你好呀"),
+]
+firstBatch = HistorySpeakerAssignment.markingPending(firstBatch, imported: firstBatch)
+XCTAssertTrue(firstBatch.allSatisfy { $0.isCompanion == nil })
+firstBatch = HistorySpeakerAssignment.confirming(
+  "她", candidates: ["我", "她"], recordKeys: Set(firstBatch.map(\.duplicateKey)), in: firstBatch)
+XCTAssertEqual(HistorySpeakerAssignment.confirmedNames(in: firstBatch), ["她"])
+let secondBatch = [
+  HistoricalMessage(speaker: "user", text: "晚安"),
+  HistoricalMessage(speaker: "assistant", text: "来啦"),
+]
+let allBatches = HistorySpeakerAssignment.confirming(
+  "assistant", candidates: ["user", "assistant"], recordKeys: Set(secondBatch.map(\.duplicateKey)),
+  in: firstBatch + secondBatch)
+XCTAssertEqual(Set(HistorySpeakerAssignment.confirmedNames(in: allBatches)), Set(["她", "assistant"]))
+XCTAssertTrue(HistorySpeakerAssignment.unresolved(in: allBatches).isEmpty)
+let reReviewed = HistorySpeakerAssignment.addingCompanionAlias(
+  "她", recordKeys: Set(allBatches.map(\.duplicateKey)), in: allBatches)
+XCTAssertEqual(Set(HistorySpeakerAssignment.confirmedNames(in: reReviewed)), Set(["她", "assistant"]))
+XCTAssertEqual(
+  Set(CharacterVoice.samples(scene: "greeting", history: allBatches, speaker: nil)),
+  Set(["你好呀", "来啦"]))
 XCTAssertThrowsError(try HistoryImporter.parse(data: Data("{bad json}".utf8), fileExtension: "json"))
 XCTAssertThrowsError(try HistoryImporter.parse(data: Data(" ".utf8), fileExtension: "txt"))
 XCTAssertThrowsError(try HistoryImporter.parse(data: Data("{\"text\":\"有效\"}\n{bad}".utf8), fileExtension: "jsonl"))
@@ -258,15 +288,19 @@ print("PASS: scheduled confirmation due/early/snoozed/dismissed, actual times pe
 // Character phrasing must not learn the user's lines or reuse stale settings.
 do {
   let p = CompanionProfile()
-  let history = [HistoricalMessage(speaker: "我", text: "加油用户原话"),
-    HistoricalMessage(speaker: "旧名字", text: "慢慢来，不着急"),
-    HistoricalMessage(speaker: "旧名字", text: "加油呀"),
-    HistoricalMessage(speaker: "旧名字", text: "加油呀")]
+  let pending = [HistoricalMessage(speaker: "我", text: "加油用户原话"),
+    HistoricalMessage(speaker: "她", text: "加油呀")]
+  precondition(CharacterVoice.speaker(history: pending, profile: p, selected: nil) == nil)
+  precondition(CharacterVoice.samples(scene: "start", history: pending, speaker: nil).isEmpty)
+  let history = [HistoricalMessage(speaker: "我", text: "加油用户原话", isCompanion: false),
+    HistoricalMessage(speaker: "旧名字", text: "慢慢来，不着急", isCompanion: true),
+    HistoricalMessage(speaker: "旧名字", text: "加油呀", isCompanion: true),
+    HistoricalMessage(speaker: "旧名字", text: "加油呀", isCompanion: true)]
   let speaker = CharacterVoice.speaker(history: history, profile: p, selected: nil)
   precondition(speaker == "旧名字")
   precondition(CharacterVoice.samples(scene: "start", history: history, speaker: speaker) == ["加油呀"])
   precondition(CharacterVoice.samples(scene: "greeting", history: history, speaker: speaker).isEmpty)
-  precondition(CharacterVoice.speaker(history: history + [HistoricalMessage(speaker: "另一个人", text: "你好")], profile: p, selected: nil) == nil)
+  precondition(CharacterVoice.speaker(history: history + [HistoricalMessage(speaker: "另一个人", text: "你好")], profile: p, selected: nil) == "旧名字")
   let signature = CharacterVoice.signature(profile: p, history: history, selected: nil, enabled: true)
   precondition(signature != CharacterVoice.signature(profile: p, history: history, selected: nil, enabled: false))
   var changed = p; changed.description = "严肃简洁"
@@ -1096,5 +1130,10 @@ print("PASS: historical recall synonyms, cancellation context, disabled/empty hi
 XCTAssertTrue(HistoricalRecall.retrievalQuery("你记反了", previousUserInputs: ["我们见过几次面？"]).contains("见过几次面"))
 XCTAssertEqual(HistoricalRecall.retrievalQuery("我吃饭了", previousUserInputs: ["见面"]), "我吃饭了")
 XCTAssertTrue(HistoricalRecall.speakerContext(companion: "陪伴者").contains("‘陪伴者’=当前扮演角色"))
+let aliasContext = HistoricalRecall.speakerContext(companions: ["assistant"], userAliases: ["阿哲"])
+XCTAssertTrue(aliasContext.contains("‘user’"))
+XCTAssertTrue(aliasContext.contains("‘用户’"))
+XCTAssertTrue(aliasContext.contains("‘阿哲’"))
+XCTAssertTrue(aliasContext.contains("‘assistant’=当前扮演角色"))
 XCTAssertTrue(HistoricalRecall.instruction.contains("只有用户明确要求"))
 print("PASS: recall correction retains topic and speaker mapping keeps first person distinct")

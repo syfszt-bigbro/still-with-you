@@ -27,6 +27,21 @@ public enum HistoricalRecall {
     "后台说话人映射：原始说话人‘我’=当前用户，回复时称‘你’。" + (companion.map { "原始说话人‘\($0)’=当前扮演角色，回复时称‘我’。" } ?? "未确认哪位说话人对应角色，不推断。") + "其他说话人保持第三人称，不猜测归属。"
   }
 
+  public static func speakerContext(companions: [String], userAliases: [String] = []) -> String {
+    let companionSet = Set(companions)
+    var seen = Set<String>()
+    let users = (["我", "user", "用户"] + userAliases).compactMap { value -> String? in
+      let clean = value.trimmingCharacters(in: .whitespacesAndNewlines)
+      guard !clean.isEmpty, !companionSet.contains(clean), seen.insert(clean).inserted else { return nil }
+      return clean
+    }
+    let userMapping = users.map { "‘\($0)’" }.joined(separator: "、") + "=当前用户，回复时称‘你’。"
+    let mapping = companions.isEmpty
+      ? "未确认哪位说话人对应角色，不推断。"
+      : "原始说话人" + companions.map { "‘\($0)’" }.joined(separator: "、") + "=当前扮演角色，回复时称‘我’。"
+    return "后台说话人映射：原始说话人" + userMapping + mapping + "其他说话人保持第三人称，不猜测归属。"
+  }
+
   private static func grams(_ text: String) -> Set<String> {
     let chars = Array(text.lowercased().filter { $0.isLetter || $0.isNumber })
     guard chars.count > 1 else { return [] }
