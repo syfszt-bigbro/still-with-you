@@ -101,6 +101,19 @@ struct MainView: View {
       HistorySpeakerReviewView(model: model, review: review)
         .interactiveDismissDisabled()
     }
+    .sheet(item: Binding(
+      get: {
+        model.state.onboarding?.completed == true ? model.pendingPersonaDescriptionReview : nil
+      },
+      set: { value in
+        if model.state.onboarding?.completed == true {
+          model.pendingPersonaDescriptionReview = value
+        }
+      }
+    )) { review in
+      PersonaDescriptionReviewView(model: model, review: review)
+        .interactiveDismissDisabled()
+    }
     .sheet(isPresented: Binding(
       get: { model.state.onboarding?.completed != true },
       set: { _ in }
@@ -183,11 +196,62 @@ struct HistorySpeakerReviewView: View {
             }
           }
           Spacer()
-          Button("确认“\(selected)”是对方") { model.confirmHistorySpeaker(selected) }
-            .buttonStyle(.borderedProminent).disabled(selected.isEmpty)
+          if model.apiReady {
+            Button("仅确认说话人") { model.confirmHistorySpeaker(selected) }
+              .disabled(selected.isEmpty || model.personaDescriptionBusy)
+            Button("确认并生成描述草案") {
+              model.confirmHistorySpeaker(selected, generateDescriptionDraft: true)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(selected.isEmpty || model.personaDescriptionBusy)
+          } else {
+            Button("确认“\(selected)”是对方") { model.confirmHistorySpeaker(selected) }
+              .buttonStyle(.borderedProminent).disabled(selected.isEmpty)
+          }
+        }
+        if !model.apiReady {
+          Text("确认后原文立即保存。配置 AI 后可从这些记录生成描述草案；没有 AI 时也能手动填写。")
+            .font(.caption).foregroundStyle(.secondary)
         }
       }
     }.padding(28).frame(width: 560)
+  }
+}
+
+struct PersonaDescriptionReviewView: View {
+  @ObservedObject var model: AppModel
+  let review: PendingPersonaDescriptionReview
+  @State private var description: String
+
+  init(model: AppModel, review: PendingPersonaDescriptionReview) {
+    self.model = model
+    self.review = review
+    _description = State(initialValue: review.description)
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      Text("确认人物描述草案").font(.title2.weight(.semibold))
+      Text("AI 从 \(review.evidenceCount) 条经你确认的对方原话抽样中提出了这份草案。它还不是事实，也尚未生效。")
+        .font(.callout)
+      TextEditor(text: $description)
+        .font(.body)
+        .padding(10)
+        .frame(minHeight: 180)
+        .background(Color.mist.opacity(0.65), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.ink.opacity(0.08)))
+      Text("请删掉猜测、夸大或不符合她的内容，也可以完全重写。确认后才会用于聊天和人物用语；以后仍可修改或重新生成草案。")
+        .font(.caption).foregroundStyle(.secondary)
+      HStack {
+        Button("放弃草案") { model.dismissPersonaDescriptionDraft() }
+        Spacer()
+        Text("\(description.count) / 4000").font(.caption2).foregroundStyle(.secondary)
+        Button("确认并启用") { model.confirmPersonaDescription(description) }
+          .buttonStyle(.borderedProminent)
+          .disabled(description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || description.count > 4000)
+      }
+    }.padding(28).frame(width: 620)
   }
 }
 struct TodayView: View {
@@ -1042,7 +1106,7 @@ struct SettingsView: View {
             if model.state.onboarding == nil { model.state.onboarding = OnboardingState() }
             model.state.onboarding?.currentStep = 1; model.state.onboarding?.completed = false; model.save()
           } }
-          setupRow(done: model.state.onboarding?.identityCompleted == true, title: "1. 名字与边界", note: "必选")
+          setupRow(done: model.state.onboarding?.identityCompleted == true, title: "1. 名字与称呼", note: "必选")
           setupRow(done: model.hasCustomCharacter, title: "2. 照片与动作包", note: "可选")
           setupRow(done: model.state.onboarding?.memoryConfigured == true, title: "3. 聊天与记忆", note: "可选")
           setupRow(done: model.state.onboarding?.apiConfigured == true, title: "4. AI 与语音", note: "均可选；系统朗读无需 Key")
@@ -1050,21 +1114,65 @@ struct SettingsView: View {
             .font(.caption).foregroundStyle(.secondary)
         }
         Card {
-          Text(UIStrings.text("名字与人物设定")).font(.headline)
+          Text(UIStrings.text("名字与称呼")).font(.headline)
           LabeledContent("对方的名字") {
             TextField(UIStrings.text("例如：陪伴者"), text: $profile.name).textFieldStyle(.roundedBorder)
           }
           LabeledContent("对方怎么称呼我") {
             TextField(UIStrings.text("例如：用户"), text: $profile.userName).textFieldStyle(.roundedBorder)
           }
-          Text(UIStrings.text("一句话描述，也可以写得详细些")).font(.subheadline)
-          TextField("例如：她说话简短、有主见，关心生活小事，不会无条件附和。", text: $profile.description, axis: .vertical)
-            .lineLimit(3...8).textFieldStyle(.roundedBorder)
-          Text(UIStrings.text("人物描述会用于 AI 聊天和复盘。名字与称呼最多 40 字，描述最多 4000 字；历史聊天可选导入。")).font(.caption).foregroundStyle(.secondary)
+          Text("这里只确定怎样称呼彼此，不在没有证据时预设性格。模拟身份、不得冒充真人、不得编造共同经历等边界由程序固定执行。")
+            .font(.caption).foregroundStyle(.secondary)
+          Button(UIStrings.text("保存名字与称呼")) {
+            model.saveIdentity(profile)
+            profile = model.profile
+          }.buttonStyle(.borderedProminent)
+        }
+
+        Card {
           HStack {
-            Button(UIStrings.text("保存人物设置")) { model.saveProfile(profile); profile = model.profile }.buttonStyle(.borderedProminent)
+            VStack(alignment: .leading, spacing: 4) {
+              Text("经你确认的人物描述").font(.headline)
+              Text(profile.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? "尚未生成或确认" : "当前已生效，可继续修改")
+                .font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text("\(model.confirmedHistoryRecordCount) 条已确认原话")
+              .font(.caption).foregroundStyle(.secondary)
+          }
+          TextField("导入记录并确认说话人后，由 AI 生成草案；也可以在这里手动填写。",
+            text: $profile.description, axis: .vertical)
+            .lineLimit(4...10).textFieldStyle(.roundedBorder)
+          Text("AI 草案不会自动生效，也不会覆盖这里的内容。你必须先查看、修改并确认；人物描述最多 4000 字。")
+            .font(.caption).foregroundStyle(.secondary)
+          HStack {
             Button(UIStrings.text("导入历史聊天…")) { model.importHistory() }
-              .disabled(model.historySpeakerDetectionBusy)
+              .disabled(model.historySpeakerDetectionBusy || model.personaDescriptionBusy)
+            Button(model.personaDescriptionBusy ? "正在生成草案…" : "从已确认记录生成草案") {
+              Task { await model.generatePersonaDescriptionDraft() }
+            }
+            .disabled(model.personaDescriptionBusy || !model.apiReady
+              || model.confirmedHistoryRecordCount == 0)
+            Spacer()
+            Button("保存手动修改") {
+              model.saveProfile(profile)
+              profile = model.profile
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(profile.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+              || profile.description.count > 4000
+              || profile.description == model.profile.description)
+          }
+          if !model.apiReady {
+            Text("未开启 AI：仍可导入记录并手动填写；生成草案需要在下方配置 AI，调用会按服务商用量计费。")
+              .font(.caption).foregroundStyle(.secondary)
+          } else if model.confirmedHistoryRecordCount == 0 {
+            Text("请先导入记录，并在识别结果中确认哪一位是对方。")
+              .font(.caption).foregroundStyle(.secondary)
+          } else {
+            Text("生成时最多发送 120 条、共 24,000 字的对方原话抽样，不发送整份资料库。")
+              .font(.caption).foregroundStyle(.secondary)
           }
         }
 
@@ -1263,6 +1371,9 @@ struct SettingsView: View {
         }
       }.padding(30)
     }.onAppear { profile = model.profile }
+      .onChange(of: model.state.companion?.description) { _, value in
+        profile.description = value ?? ""
+      }
   }
   private func setupRow(done: Bool, title: String, note: String) -> some View {
     HStack {

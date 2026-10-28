@@ -145,6 +145,7 @@ var migrated = try JSONDecoder().decode(AppState.self, from: JSONSerialization.d
 try migrated.validate()
 XCTAssertEqual((migrated.companion ?? CompanionProfile()).displayName, "陪伴者")
 var profile = CompanionProfile()
+XCTAssertTrue(profile.description.isEmpty)
 profile.name = "小雨"
 profile.userName = "阿哲"
 profile.description = "她是温柔的图书管理员，喜欢猫。"
@@ -227,6 +228,16 @@ XCTAssertEqual(Set(HistorySpeakerAssignment.confirmedNames(in: reReviewed)), Set
 XCTAssertEqual(
   Set(CharacterVoice.samples(scene: "greeting", history: allBatches, speaker: nil)),
   Set(["你好呀", "来啦"]))
+let personaSamples = try PersonaDescriptionPolicy.samples(from: allBatches, limit: 20)
+XCTAssertEqual(Set(personaSamples.map(\.speaker)), Set(["她", "assistant"]))
+XCTAssertFalse(personaSamples.contains { $0.text == "到家了" || $0.text == "晚安" })
+let decodedPersona = try PersonaDescriptionPolicy.decode(
+  "```json\n{\"description\":\"记录中常用短句回应，也会直接关心眼前的小事。\"}\n```")
+XCTAssertTrue(decodedPersona.description.contains("短句回应"))
+XCTAssertThrowsError(try PersonaDescriptionPolicy.samples(from: [
+  HistoricalMessage(speaker: "未确认", text: "不能用", isCompanion: nil)
+]))
+XCTAssertThrowsError(try PersonaDescriptionPolicy.decode("不是 JSON"))
 XCTAssertThrowsError(try HistoryImporter.parse(data: Data("{bad json}".utf8), fileExtension: "json"))
 XCTAssertThrowsError(try HistoryImporter.parse(data: Data(" ".utf8), fileExtension: "txt"))
 XCTAssertThrowsError(try HistoryImporter.parse(data: Data("{\"text\":\"有效\"}\n{bad}".utf8), fileExtension: "jsonl"))

@@ -49,16 +49,21 @@ public enum CompanionSchedule {
 }
 
 public struct CompanionProfile: Codable, Equatable, Sendable {
+  public static let legacyPlaceholderDescription =
+    "说话自然、简短，有自己的判断；关心眼前的生活，不夸大关系，也不冒充现实中的人。"
   public var name = "陪伴者"
   public var userName = "你"
-  public var description = "说话自然、简短，有自己的判断；关心眼前的生活，不夸大关系，也不冒充现实中的人。"
+  /// A user-confirmed description. New profiles intentionally start blank:
+  /// imported records may propose a draft, but AI output never becomes truth
+  /// until the user reviews and confirms it.
+  public var description = ""
   public init() {}
   public var displayName: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "陪伴者" : name.trimmingCharacters(in: .whitespacesAndNewlines) }
   public var displayUserName: String { userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "你" : userName.trimmingCharacters(in: .whitespacesAndNewlines) }
   public var systemPrompt: String {
     """
     你是桌面应用中的 AI 陪伴角色。当前名字：\(displayName)。称呼用户：\(displayUserName)。
-    下面是用户在设置页填写的人物描述，用来设定角色性格和聊天背景：
+    下面是用户根据已确认记录审核、或手动补充的人物描述，用来设定角色性格和聊天背景：
     <character-description>\(description.prefix(4000))</character-description>
     当前名字、称呼和人物描述优先于旧对话中的称呼与人物设定；旧对话只作相关往事和表达风格的参考，不要把用户的话学成对方的话。
     保持自然中文交流，有自己的判断，不必每句重复称呼。被问到真实身份时说明是 AI 角色，不声称就是现实中的某个人。若描述为空，采用友好、简洁、尊重用户的风格。

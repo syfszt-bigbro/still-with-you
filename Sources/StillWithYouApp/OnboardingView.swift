@@ -45,29 +45,41 @@ struct OnboardingView: View {
       HistorySpeakerReviewView(model: model, review: review)
         .interactiveDismissDisabled()
     }
+    .sheet(item: $model.pendingPersonaDescriptionReview) { review in
+      PersonaDescriptionReviewView(model: model, review: review)
+        .interactiveDismissDisabled()
+    }
     .sheet(item: $model.pendingCharacterPhoto) { pending in
       CharacterPhotoEditorView(model: model, pending: pending)
         .interactiveDismissDisabled(model.characterBusy)
+    }
+    .onChange(of: model.state.companion?.description) { _, value in
+      profile.description = value ?? ""
     }
   }
 
   private var identityStep: some View {
     VStack(alignment: .leading, spacing: 18) {
-      setupHeader("步骤 1 · 名字与边界", required: true,
-        detail: "这是唯一必选步骤。先确定怎样称呼彼此，以及这个角色绝不能越过的边界。")
+      setupHeader("步骤 1 · 名字与称呼", required: true,
+        detail: "这是唯一必选步骤。这里只确定怎样称呼彼此；人物描述要等读取记录、确认说话人以后再生成。")
       Card {
         LabeledContent("对方的名字") { TextField("例如：阿岚", text: $profile.name).textFieldStyle(.roundedBorder) }
         LabeledContent("对方怎么称呼你") { TextField("例如：小周", text: $profile.userName).textFieldStyle(.roundedBorder) }
-        Text("人物描述与边界").font(.subheadline)
-        TextField("例如：说话简短、有主见；只模拟聊天风格，不冒充真人；不夸大关系。",
-          text: $profile.description, axis: .vertical)
-          .lineLimit(5...9).textFieldStyle(.roundedBorder)
-        Text("程序会始终标明这是记录驱动的模拟，不是现实人物本人。")
+        Divider()
+        Text("固定边界").font(.subheadline.weight(.semibold))
+        Label("始终标明这是记录驱动的模拟，不是现实人物本人", systemImage: "person.crop.circle.badge.exclamationmark")
+        Label("没有证据就不编造共同经历，也不夸大关系", systemImage: "checkmark.shield")
+        Label("AI 提出的描述必须由你查看、修改并确认后才生效", systemImage: "pencil.and.list.clipboard")
+        Text("这些边界由程序执行，不需要写进人物描述。")
           .font(.caption).foregroundStyle(.secondary)
       }
       nextButton("保存并继续") {
-        model.saveProfile(profile)
-        guard !profile.displayName.isEmpty, !profile.displayUserName.isEmpty else { return }
+        guard !profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+          !profile.userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+          model.saveIdentity(profile)
+          return
+        }
+        model.saveIdentity(profile)
         move(to: 2)
       }
     }
@@ -119,6 +131,7 @@ struct OnboardingView: View {
         Button("导入聊天记录…") { model.importHistory() }
           .buttonStyle(.borderedProminent).disabled(model.historySpeakerDetectionBusy)
       }
+      personaDraftCard
       navigation(optionalDone: setup.memoryConfigured, next: 4)
     }
   }
@@ -161,6 +174,7 @@ struct OnboardingView: View {
         Text("测试会发送一句最短请求，可能产生极少量 API 费用。密钥只保存在 macOS 钥匙串，不进入备份。")
           .font(.caption).foregroundStyle(.secondary)
       }
+      if model.confirmedHistoryRecordCount > 0 { personaDraftCard }
       ClonedSpeechSettings(model: model, voice: model.clonedSpeech)
       Card {
         Text("写在最后").font(.title3.weight(.semibold))
@@ -180,6 +194,40 @@ struct OnboardingView: View {
     VStack(alignment: .leading, spacing: 8) {
       HStack { Text(title).font(.system(size: 26, weight: .medium, design: .serif)); Text(required ? "必选" : "可选").font(.caption.weight(.semibold)).padding(.horizontal, 9).padding(.vertical, 4).background((required ? Color.apricot : Color.lake).opacity(0.18), in: Capsule()) }
       Text(detail).foregroundStyle(.secondary)
+    }
+  }
+
+  private var personaDraftCard: some View {
+    Card {
+      HStack {
+        VStack(alignment: .leading, spacing: 4) {
+          Text("人物描述草案").font(.headline)
+          Text(profile.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? "尚未确认人物描述" : "已有经你确认的人物描述")
+            .font(.caption).foregroundStyle(.secondary)
+        }
+        Spacer()
+        Text("\(model.confirmedHistoryRecordCount) 条已确认原话")
+          .font(.caption).foregroundStyle(.secondary)
+      }
+      Text("导入后先确认哪位是对方。AI 只会生成一份可编辑草案，必须由你确认后才会用于聊天。")
+        .font(.caption).foregroundStyle(.secondary)
+      Button(model.personaDescriptionBusy ? "正在生成草案…" : "从已确认记录生成草案") {
+        Task { await model.generatePersonaDescriptionDraft() }
+      }
+      .buttonStyle(.borderedProminent)
+      .disabled(model.personaDescriptionBusy || !model.apiReady
+        || model.confirmedHistoryRecordCount == 0)
+      if !model.apiReady {
+        Text("尚未配置 AI。可以先完成导入；连接 AI 后再生成，或进入设置手动填写。")
+          .font(.caption).foregroundStyle(.secondary)
+      } else if model.confirmedHistoryRecordCount == 0 {
+        Text("先导入记录，并在识别窗口中确认哪一位是对方。")
+          .font(.caption).foregroundStyle(.secondary)
+      } else {
+        Text("本次会发送最多 120 条、共 24,000 字的对方原话抽样，可能产生少量 API 费用。")
+          .font(.caption).foregroundStyle(.secondary)
+      }
     }
   }
 
