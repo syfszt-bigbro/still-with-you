@@ -89,6 +89,9 @@ public struct HistoricalMessage: Codable, Identifiable, Sendable {
   public var duplicateKey: String {
     "\(sourceID ?? "")\u{0}\(sourceIndex.map(String.init) ?? "")\u{0}\(timestamp)\u{0}\(speaker)\u{0}\(text)"
   }
+  fileprivate var legacyDuplicateKey: String {
+    "\(timestamp)\u{0}\(speaker)\u{0}\(text)"
+  }
 }
 
 public enum HistoryImportError: LocalizedError {
@@ -282,7 +285,16 @@ public enum HistoryImporter {
   }
   public static func merging(_ incoming: [HistoricalMessage], into existing: [HistoricalMessage]) -> [HistoricalMessage] {
     var keys = Set(existing.map(\.duplicateKey))
-    return existing + incoming.filter { keys.insert($0.duplicateKey).inserted }
+    // Versions before 1.0.6 did not attach provenance to ordinary TXT/JSON
+    // rows. Match those legacy rows by their old content identity once, while
+    // keeping independently sourced current documents distinct.
+    let legacyKeys = Set(existing.filter { $0.sourceID == nil }.map(\.legacyDuplicateKey))
+    return existing + incoming.filter { record in
+      if keys.contains(record.duplicateKey) { return false }
+      if record.sourceID != nil, legacyKeys.contains(record.legacyDuplicateKey) { return false }
+      keys.insert(record.duplicateKey)
+      return true
+    }
   }
 }
 

@@ -4,6 +4,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import UserNotifications
 import StillWithYouCore
+import StillWithYouImport
 import StillWithYouAssets
 
 private extension String {
@@ -360,50 +361,65 @@ struct PendingHistorySpeakerReview: Identifiable {
     panel.title = "导入历史聊天"
     panel.allowsMultipleSelection = true
     panel.canChooseDirectories = false
+    panel.allowedContentTypes = HistoryDocumentImporter.supportedExtensions.compactMap {
+      UTType(filenameExtension: $0)
+    }
     guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
-    do {
-      var incoming: [HistoricalMessage] = []
-      for url in panel.urls {
-        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-        guard size <= 10 * 1024 * 1024 else {
-          throw HistoryImportError.invalid("\(url.lastPathComponent) 超过 10 MB，请拆分后导入。")
-        }
-        incoming += try HistoryImporter.parse(
-          data: Data(contentsOf: url), fileExtension: url.pathExtension)
+    let urls = panel.urls
+    historySpeakerReviewRevision = UUID()
+    historySpeakerDetectionBusy = true
+    pendingHistorySpeakerReview = nil
+    notice = "正在本机读取并识别 \(urls.count) 个文件；图片和扫描 PDF 可能需要一点时间。"
+    Task {
+      do {
+        let incoming = try await Task.detached(priority: .userInitiated) {
+          try urls.flatMap { try HistoryDocumentImporter.importFile(at: $0) }
+        }.value
+        finishHistoryImport(incoming, fileCount: urls.count)
+      } catch {
+        historySpeakerDetectionBusy = false
+        notice = "导入失败：\(error.localizedDescription)"
       }
-      let previous = state.historicalRecords ?? library.history
-      let previousKeys = Set(previous.map(\.duplicateKey))
-      let result = HistoryImportPolicy.importing(
-        incoming, into: previous, knowledge: effectiveKnowledge, profile: profile)
-      let addedRecords = result.records.filter { !previousKeys.contains($0.duplicateKey) }
-      let pendingRecords = HistorySpeakerAssignment.markingPending(
-        result.records, imported: addedRecords)
-      state.historicalRecords = pendingRecords
-      library.history = pendingRecords
-      state.voiceSpeaker = nil
-      // Raw history is usable on its own. It never silently creates or replaces
-      // relationship summaries; those cards remain fully user-owned.
-      state.knowledge = result.knowledge
-      if state.onboarding == nil { state.onboarding = OnboardingState() }
-      state.onboarding?.memoryConfigured = true
-      save()
-      guard storageError.isEmpty else { return }
-      let added = addedRecords.count
-      let duplicates = max(0, incoming.count - added)
-      let fileLabel = panel.urls.count == 1 ? "" : "\(panel.urls.count) 个文件共"
-      notice = "已保存\(fileLabel) \(added) 条历史原文，正在识别说话人；没有自动生成描述或总结。"
-      guard added > 0 else {
-        notice = "所选文件中的原文都已存在，未重复导入。"
-        return
-      }
-      let candidates = HistoryImportPolicy.candidates(in: addedRecords)
-      startHistorySpeakerReview(
-        candidates: candidates,
-        localSuggestion: HistoryImportPolicy.localSuggestion(
-          candidates: candidates, profile: profile),
-        recordKeys: Set(addedRecords.map(\.duplicateKey)), importedCount: added,
-        duplicateCount: duplicates)
-    } catch { notice = "导入失败：\(error.localizedDescription)" }
+    }
+  }
+
+  private func finishHistoryImport(_ incoming: [HistoricalMessage], fileCount: Int) {
+    let previous = state.historicalRecords ?? library.history
+    let previousKeys = Set(previous.map(\.duplicateKey))
+    let result = HistoryImportPolicy.importing(
+      incoming, into: previous, knowledge: effectiveKnowledge, profile: profile)
+    let addedRecords = result.records.filter { !previousKeys.contains($0.duplicateKey) }
+    let pendingRecords = HistorySpeakerAssignment.markingPending(
+      result.records, imported: addedRecords)
+    state.historicalRecords = pendingRecords
+    library.history = pendingRecords
+    state.voiceSpeaker = nil
+    // Raw history is usable on its own. It never silently creates or replaces
+    // relationship summaries; those cards remain fully user-owned.
+    state.knowledge = result.knowledge
+    if state.onboarding == nil { state.onboarding = OnboardingState() }
+    state.onboarding?.memoryConfigured = true
+    save()
+    guard storageError.isEmpty else {
+      historySpeakerDetectionBusy = false
+      return
+    }
+    let added = addedRecords.count
+    let duplicates = max(0, incoming.count - added)
+    let fileLabel = fileCount == 1 ? "" : "\(fileCount) 个文件共"
+    notice = "已保存\(fileLabel) \(added) 条历史原文，正在识别说话人；没有自动生成描述或总结。"
+    guard added > 0 else {
+      historySpeakerDetectionBusy = false
+      notice = "所选文件中的原文都已存在，未重复导入。"
+      return
+    }
+    let candidates = HistoryImportPolicy.candidates(in: addedRecords)
+    startHistorySpeakerReview(
+      candidates: candidates,
+      localSuggestion: HistoryImportPolicy.localSuggestion(
+        candidates: candidates, profile: profile),
+      recordKeys: Set(addedRecords.map(\.duplicateKey)), importedCount: added,
+      duplicateCount: duplicates)
   }
 
   func cancelHistorySpeakerReview() {

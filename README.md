@@ -10,7 +10,7 @@
 
 1. **名字与边界（必选，约 1 分钟）**：填写对方的名字、对方如何称呼你，以及人物描述与边界。
 2. **照片动画卡（可选，约 1 分钟）**：选择一张照片，在本机保留完整画面并生成头像和 11 组轻动画 PNG；不会用 AI 改人物姿势，不上传原图，也不把原图复制进资料库。不配置时使用内置抽象形象。
-3. **聊天与记忆（可选，时间取决于资料量）**：可一次选择多个 TXT、Markdown、JSON 或 JSONL，并专门识别 WeFlow 的 Markdown 导出格式。原文独立保存，不强制生成描述或总结；程序会让你确认哪一位是对方。确认前可取消并撤销本次导入。
+3. **聊天与记忆（可选，时间取决于资料量）**：可一次选择多个 TXT、Markdown、JSON、JPG/PNG、Word 或 PDF，并专门识别 WeFlow 的 Markdown 导出格式。图片与扫描 PDF 使用 macOS 本机 OCR；原文独立保存，不强制生成描述或总结。程序会让你确认哪一位是对方，确认前可取消并撤销本次导入。
 4. **AI 与语音（可选，约 2 分钟）**：聊天可选择 DeepSeek、OpenAI 或自定义 OpenAI 兼容地址。语音默认使用免费的 macOS 系统朗读；如需复刻声音，可另行填写自己的阿里云百炼 API Key 与音色 ID。
 
 语音也是可选项。复刻声音失败时会自动回退到 macOS 系统朗读；不开启语音不影响任何文字功能。
@@ -22,7 +22,7 @@
 - 可拖动的桌面伙伴、动作反馈、聊天窗口和菜单栏入口
 - 日计划、专注与运动计时、提前提醒、反馈与统计复盘
 - 上传照片并在本机生成头像、动作图和桌面动画图集
-- 导入聊天原文；支持 UTF-8 TXT / Markdown / JSON / JSONL 与 WeFlow Markdown，可多选，每个文件最多 10 MB；每次导入后确认谁是对方
+- 导入聊天原文；支持 UTF-8 TXT / Markdown / JSON / JSONL、WeFlow Markdown、JPG / PNG / HEIC / TIFF、DOC / DOCX / RTF 和 PDF，可多选；文字文件最多 10 MB，图片和文档最多 50 MB；每次导入后确认谁是对方
 - Persona 优先、Relationship Memory 次之的对话链路
 - 相关记忆检索、偶尔自然提起往事、最多一件往事/回复
 - 用户纠正立即生效；修改前自动存档；最多保留 20 个可回滚版本
@@ -48,6 +48,7 @@ git clone https://github.com/syfszt-bigbro/still-with-you.git
 cd still-with-you
 swift run CoreChecks
 swift run CharacterAssetChecks
+swift run HistoryDocumentChecks
 ./scripts/privacy_audit.sh
 ./scripts/build_app.sh
 open "dist/Still With You.app"
@@ -60,7 +61,9 @@ open "dist/Still With You.app"
 
 ## 聊天记录格式
 
-最简单的是纯文本或 Markdown。JSON 可使用数组，或包含 `messages` 数组：
+最简单的是纯文本或 Markdown。也可以直接选择 JPG/JPEG/PNG/HEIC/TIFF、Word（DOC/DOCX/RTF）或 PDF。图片和扫描型 PDF 会在本机使用 macOS Vision OCR，不上传；聊天截图中的文字会按版面保留为“左侧 / 右侧”候选，再由你确认哪一边是对方。文字型 PDF 与 Word 会先提取正文，再进入同一套说话人确认流程。
+
+JSON 可使用数组，或包含 `messages` 数组：
 
 ```json
 [
@@ -98,11 +101,12 @@ open "dist/Still With You.app"
 ```bash
 swift run CoreChecks
 swift run CharacterAssetChecks
+swift run HistoryDocumentChecks
 swift build -c release
 ./scripts/privacy_audit.sh
 ```
 
-核心检查覆盖计时、迁移、备份、聊天导入、证据记忆、Persona 顺序、相关检索、纠正与回滚、API 配置持久化，以及重复/劝睡/身份与关系夸大的回复质量守卫。照片动画检查会验证头像和 11 个动作文件都保留完整原图，并覆盖同一路径重新生成的刷新场景。
+核心检查覆盖计时、迁移、备份、聊天导入、证据记忆、Persona 顺序、相关检索、纠正与回滚、API 配置持久化，以及重复/劝睡/身份与关系夸大的回复质量守卫。照片动画检查会验证头像和 11 个动作文件都保留完整原图，并覆盖同一路径重新生成的刷新场景。文档导入检查会现场生成虚构 JPG、扫描 PDF 和 DOCX，验证本机 OCR、左右说话人、Word 提取与来源去重标识。
 
 ## 设计来源与许可
 

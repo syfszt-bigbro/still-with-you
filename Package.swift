@@ -9,14 +9,20 @@ let package = Package(
   ],
   targets: [
     .target(name: "StillWithYouCore", resources: [.process("Resources")]),
+    .target(name: "StillWithYouImport", dependencies: ["StillWithYouCore"]),
     .target(name: "StillWithYouAssets"),
     .executableTarget(
-      name: "StillWithYouApp", dependencies: ["StillWithYouCore", "StillWithYouAssets"],
+      name: "StillWithYouApp",
+      dependencies: ["StillWithYouCore", "StillWithYouImport", "StillWithYouAssets"],
       resources: [.process("Resources")]),
     .executableTarget(
       name: "CoreChecks", dependencies: ["StillWithYouCore"], path: "Tests/CoreChecks"),
     .executableTarget(
       name: "CharacterAssetChecks", dependencies: ["StillWithYouAssets"],
       path: "Tests/CharacterAssetChecks"),
+    .executableTarget(
+      name: "HistoryDocumentChecks",
+      dependencies: ["StillWithYouCore", "StillWithYouImport"],
+      path: "Tests/HistoryDocumentChecks"),
   ],
   swiftLanguageModes: [.v5])

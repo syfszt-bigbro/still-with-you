@@ -925,9 +925,11 @@ struct MemoryView: View {
             Button(model.historySpeakerDetectionBusy ? "正在识别说话人…" : "重新识别并添加对方名称") {
               model.reviewImportedHistorySpeakers()
             }.disabled(model.historySpeakerDetectionBusy || model.library.history.isEmpty)
-            Text(UIStrings.text("可多选；支持 UTF-8 TXT / Markdown / JSON / JSONL 与 WeFlow Markdown，每个文件最多 10 MB。"))
+            Text("可多选；支持 TXT / Markdown / JSON / WeFlow、JPG / PNG、DOC / DOCX / RTF 和 PDF。文字文件最多 10 MB，文档或图片最多 50 MB。")
               .font(.caption).foregroundStyle(.secondary)
           }
+          Text("图片和扫描 PDF 使用 macOS 本机 OCR，不上传；聊天截图会保留“左侧 / 右侧”候选，由你确认哪一边是对方。")
+            .font(.caption).foregroundStyle(.secondary)
           Text("导入只保存原文，不强制生成总结。记录含明确说话人时，启用 AI 会发送少量名称与样例用于建议；无论建议是什么，最终都由你选择谁是对方。")
             .font(.caption).foregroundStyle(.secondary)
           if !model.confirmedHistorySpeakers.isEmpty {

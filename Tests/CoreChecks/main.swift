@@ -199,6 +199,10 @@ let anotherChatRecords = try HistoryImporter.parse(
   data: Data(anotherChat.utf8), fileExtension: "md")
 XCTAssertEqual(HistoryImporter.merging(anotherChatRecords, into: weFlowRecords).count, 4)
 XCTAssertEqual(HistoryImporter.merging(weFlowRecords, into: weFlowRecords).count, 2)
+let legacyPlainRow = HistoricalMessage(speaker: "她", text: "旧版本已经导入过")
+let currentPlainRow = HistoricalMessage(
+  speaker: "她", text: "旧版本已经导入过", sourceID: "file:fixture", sourceIndex: 0)
+XCTAssertEqual(HistoryImporter.merging([currentPlainRow], into: [legacyPlainRow]).count, 1)
 var firstBatch = [
   HistoricalMessage(speaker: "我", text: "到家了"),
   HistoricalMessage(speaker: "她", text: "你好呀"),

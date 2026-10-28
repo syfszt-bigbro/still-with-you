@@ -90,7 +90,7 @@ struct OnboardingView: View {
   private var memoryStep: some View {
     VStack(alignment: .leading, spacing: 18) {
       setupHeader("步骤 3 · 聊天与记忆", required: false,
-        detail: "可一次选多个 TXT、Markdown、JSON 或 JSONL，支持 WeFlow Markdown。原文与可选总结分开保存；导入后由你确认聊天中的哪一位是对方。")
+        detail: "可一次选多个 TXT、Markdown、JSON、JPG/PNG、Word 或 PDF。图片与扫描 PDF 在本机 OCR；原文与可选总结分开保存，导入后由你确认聊天中的哪一位是对方。")
       Card {
         Label("\(model.state.historicalRecords?.count ?? 0) 条原始片段 · \(model.effectiveKnowledge.memories.count) 张可选总结",
           systemImage: "text.book.closed")
