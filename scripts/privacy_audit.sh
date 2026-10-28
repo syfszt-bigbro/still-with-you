@@ -22,7 +22,8 @@ if rg -n --hidden -S "$secret" \
 fi
 
 if git rev-parse --verify HEAD >/dev/null 2>&1; then
-  if git log -p --all -- . ':(exclude)*.png' | rg -n -S "$blocked|$secret"; then
+  if git log -p --all -- . ':(exclude)*.png' ':(exclude)scripts/privacy_audit.sh' \
+    | rg -n -S "$blocked|$secret"; then
     print -u2 "Privacy audit failed: blocked data exists in Git history."
     failed=1
   fi
