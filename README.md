@@ -9,7 +9,7 @@
 程序内和这里使用完全相同的 4 步编号：
 
 1. **名字与边界（必选，约 1 分钟）**：填写对方的名字、对方如何称呼你，以及人物描述与边界。
-2. **照片与动作包（可选，约 1 分钟）**：选择一张照片，在本机生成头像和 11 组动作 PNG；不上传原图，也不把原图复制进资料库。不配置时使用内置抽象形象。
+2. **照片动画卡（可选，约 1 分钟）**：选择一张照片，在本机保留完整画面并生成头像和 11 组轻动画 PNG；不会用 AI 改人物姿势，不上传原图，也不把原图复制进资料库。不配置时使用内置抽象形象。
 3. **聊天与记忆（可选，时间取决于资料量）**：导入 TXT、Markdown、JSON 或 JSONL。只有带原文证据的内容会进入关系记忆。
 4. **AI API（可选，约 2 分钟）**：选择 DeepSeek、OpenAI 或自定义 OpenAI 兼容地址，填写模型和 API Key，然后测试连接。测试请求也可能产生极少量费用。
 
@@ -47,6 +47,7 @@
 git clone https://github.com/syfszt-bigbro/still-with-you.git
 cd still-with-you
 swift run CoreChecks
+swift run CharacterAssetChecks
 ./scripts/privacy_audit.sh
 ./scripts/build_app.sh
 open "dist/Still With You.app"
@@ -95,11 +96,12 @@ open "dist/Still With You.app"
 
 ```bash
 swift run CoreChecks
+swift run CharacterAssetChecks
 swift build -c release
 ./scripts/privacy_audit.sh
 ```
 
-核心检查覆盖计时、迁移、备份、聊天导入、证据记忆、Persona 顺序、相关检索、纠正与回滚、API 配置持久化，以及重复/劝睡/身份与关系夸大的回复质量守卫。
+核心检查覆盖计时、迁移、备份、聊天导入、证据记忆、Persona 顺序、相关检索、纠正与回滚、API 配置持久化，以及重复/劝睡/身份与关系夸大的回复质量守卫。照片动画检查会验证头像和 11 个动作文件都保留完整原图，并覆盖同一路径重新生成的刷新场景。
 
 ## 设计来源与许可
 

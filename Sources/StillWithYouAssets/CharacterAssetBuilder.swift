@@ -1,23 +1,35 @@
 import AppKit
 import Foundation
 
-struct CharacterAssetManifest: Codable {
-  var formatVersion = 1
-  var createdAt = Date()
-  var actions: [String]
-  var spriteSheet: String
-  var avatar: String
+public struct CharacterAssetManifest: Codable {
+  public var formatVersion = 1
+  public var createdAt = Date()
+  public var actions: [String]
+  public var spriteSheet: String
+  public var avatar: String
+
+  public init(actions: [String], spriteSheet: String, avatar: String) {
+    self.actions = actions
+    self.spriteSheet = spriteSheet
+    self.avatar = avatar
+  }
 }
 
-enum CharacterAssetBuilder {
-  static let actions = [
+public struct CharacterAssetError: LocalizedError {
+  public var message: String
+  public var errorDescription: String? { message }
+  public init(message: String) { self.message = message }
+}
+
+public enum CharacterAssetBuilder {
+  public static let actions = [
     "idle", "run-right", "run-left", "wave", "jump", "encourage",
     "wait", "think", "review", "look-a", "look-b",
   ]
 
-  static func build(from sourceURL: URL, in root: URL) throws -> CharacterAssetManifest {
+  public static func build(from sourceURL: URL, in root: URL) throws -> CharacterAssetManifest {
     guard let source = NSImage(contentsOf: sourceURL), source.size.width > 0, source.size.height > 0 else {
-      throw AppFailure(message: "无法读取这张图片，请选择 PNG、JPEG、HEIC 或 WebP。")
+      throw CharacterAssetError(message: "无法读取这张图片，请选择 PNG、JPEG、HEIC 或 WebP。")
     }
     let fm = FileManager.default
     let folder = root.appendingPathComponent("character", isDirectory: true)
@@ -45,18 +57,22 @@ enum CharacterAssetBuilder {
     avatar.lockFocus()
     NSColor(calibratedRed: 0.91, green: 0.93, blue: 0.94, alpha: 1).setFill()
     NSBezierPath(roundedRect: NSRect(x: 0, y: 0, width: 512, height: 512), xRadius: 112, yRadius: 112).fill()
-    drawAspectFill(source, in: NSRect(x: 34, y: 34, width: 444, height: 444), radius: 104)
+    drawAspectFit(source, in: NSRect(x: 34, y: 34, width: 444, height: 444), radius: 72)
     avatar.unlockFocus()
     let avatarURL = folder.appendingPathComponent("custom-avatar.png")
     try pngData(avatar).write(to: avatarURL, options: .atomic)
     try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: avatarURL.path)
 
-    guard let cg = sheet.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-      throw AppFailure(message: "动作图生成失败。")
-    }
     for (row, action) in actions.enumerated() {
-      guard let crop = cg.cropping(to: CGRect(x: 0, y: (10 - row) * 208, width: 192, height: 208)) else { continue }
-      let image = NSImage(cgImage: crop, size: NSSize(width: 192, height: 208))
+      // Render standalone previews directly. Cropping an AppKit canvas through
+      // CGImage mixes bottom-left and top-left coordinate systems and used to
+      // export an unrelated corner of the sprite sheet.
+      let image = NSImage(size: NSSize(width: 192, height: 208))
+      image.lockFocus()
+      NSColor.clear.setFill()
+      NSRect(x: 0, y: 0, width: 192, height: 208).fill()
+      draw(source: source, in: NSRect(x: 0, y: 0, width: 192, height: 208), row: row, column: 0)
+      image.unlockFocus()
       let url = actionFolder.appendingPathComponent(action + ".png")
       try pngData(image).write(to: url, options: .atomic)
       try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
@@ -96,34 +112,51 @@ enum CharacterAssetBuilder {
     transform.concat()
     NSColor(calibratedRed: 0.36, green: 0.49, blue: 0.65, alpha: 0.14).setFill()
     NSBezierPath(ovalIn: cell.insetBy(dx: 18, dy: 12)).fill()
-    drawAspectFill(source, in: cell.insetBy(dx: 22, dy: 15), radius: 72)
-    if row == 3, let symbol = NSImage(systemSymbolName: "hand.wave.fill", accessibilityDescription: nil) {
-      symbol.draw(in: NSRect(x: cell.maxX - 52, y: cell.maxY - 58, width: 34, height: 34))
+    drawAspectFit(source, in: cell.insetBy(dx: 18, dy: 14), radius: 26)
+    let symbols = [
+      "sparkles", "arrow.right", "arrow.left", "hand.wave.fill", "arrow.up",
+      "heart.fill", "hourglass", "lightbulb.fill", "checkmark.circle.fill", "eye.fill", "eyes",
+    ]
+    if symbols.indices.contains(row),
+      let symbol = NSImage(systemSymbolName: symbols[row], accessibilityDescription: nil)
+    {
+      let badge = NSRect(x: cell.maxX - 54, y: cell.maxY - 54, width: 36, height: 36)
+      NSColor(calibratedWhite: 0.12, alpha: 0.82).setFill()
+      NSBezierPath(ovalIn: badge).fill()
+      let whiteSymbol = symbol.withSymbolConfiguration(
+        NSImage.SymbolConfiguration(paletteColors: [.white])) ?? symbol
+      whiteSymbol.draw(in: badge.insetBy(dx: 8, dy: 8), from: .zero, operation: .sourceOver, fraction: 1)
     }
     NSGraphicsContext.restoreGraphicsState()
   }
 
-  private static func drawAspectFill(_ image: NSImage, in rect: NSRect, radius: CGFloat) {
+  private static func drawAspectFit(_ image: NSImage, in rect: NSRect, radius: CGFloat) {
     NSGraphicsContext.saveGraphicsState()
     NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).addClip()
+    NSColor(calibratedRed: 0.94, green: 0.95, blue: 0.96, alpha: 0.98).setFill()
+    rect.fill()
     let sourceAspect = image.size.width / image.size.height
     let targetAspect = rect.width / rect.height
     var drawRect = rect
     if sourceAspect > targetAspect {
-      drawRect.size.width = rect.height * sourceAspect
-      drawRect.origin.x = rect.midX - drawRect.width / 2
-    } else {
       drawRect.size.height = rect.width / sourceAspect
       drawRect.origin.y = rect.midY - drawRect.height / 2
+    } else {
+      drawRect.size.width = rect.height * sourceAspect
+      drawRect.origin.x = rect.midX - drawRect.width / 2
     }
     image.draw(in: drawRect, from: .zero, operation: .sourceOver, fraction: 1)
     NSGraphicsContext.restoreGraphicsState()
+    NSColor(calibratedWhite: 0.25, alpha: 0.24).setStroke()
+    let border = NSBezierPath(roundedRect: rect.insetBy(dx: 0.5, dy: 0.5), xRadius: radius, yRadius: radius)
+    border.lineWidth = 1
+    border.stroke()
   }
 
   private static func pngData(_ image: NSImage) throws -> Data {
     guard let tiff = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff),
       let data = bitmap.representation(using: .png, properties: [:]) else {
-      throw AppFailure(message: "无法写出 PNG 动作图。")
+      throw CharacterAssetError(message: "无法写出 PNG 动作图。")
     }
     return data
   }

@@ -26,7 +26,7 @@ private struct ReachAnimation: Decodable {
   var row = 0, col = 0
   var rowSince = Date()
   var currentState = "idle"
-  private var loadedCharacterID: String?
+  private var loadedCharacterRevision: String?
   var dragOrigin: NSPoint?
   var pointerOrigin: NSPoint?
   var moved = false
@@ -55,17 +55,19 @@ private struct ReachAnimation: Decodable {
   }
   func loadCharacterAssets() {
     let selected = model.state.preferences.desktopCharacterID ?? "default"
-    guard loadedCharacterID != selected else { return }
-    loadedCharacterID = selected
-    frames.removeAll(); frameBitmaps.removeAll(); reachAnimation = nil
-    staticCharacter = nil; staticCharacterBitmap = nil
-    row = 0; col = 0; currentState = "idle"; rowSince = Date()
     let resource: String
     switch selected {
     case "custom": resource = "custom-spritesheet"
     default: resource = "default-spritesheet"
     }
     let local = model.directory.appendingPathComponent("character/\(resource).png")
+    let revision = (try? CharacterAssetRevision.cacheKey(
+      selection: selected, customAssetURL: local)) ?? selected
+    guard loadedCharacterRevision != revision else { return }
+    loadedCharacterRevision = revision
+    frames.removeAll(); frameBitmaps.removeAll(); reachAnimation = nil
+    staticCharacter = nil; staticCharacterBitmap = nil
+    row = 0; col = 0; currentState = "idle"; rowSince = Date()
     let packagedBundle = Bundle.main.url(
       forResource: "StillWithYou_StillWithYouApp", withExtension: "bundle"
     ).flatMap(Bundle.init(url:))

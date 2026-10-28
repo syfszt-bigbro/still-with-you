@@ -68,7 +68,7 @@ struct OnboardingView: View {
   private var photoStep: some View {
     VStack(alignment: .leading, spacing: 18) {
       setupHeader("步骤 2 · 桌面形象", required: false,
-        detail: "选一张照片，程序会在本机生成头像与 11 组动作图。也可以直接使用内置的抽象形象。")
+        detail: "选一张照片，程序会在本机保留完整画面，生成头像与 11 组轻动画卡。它不会用 AI 改姿势；也可以直接使用内置抽象形象。")
       Card {
         Label(model.hasCustomCharacter ? "已生成本机动作包" : "尚未添加照片",
           systemImage: model.hasCustomCharacter ? "checkmark.seal.fill" : "photo.badge.plus")

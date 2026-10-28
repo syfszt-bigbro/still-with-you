@@ -4,6 +4,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import UserNotifications
 import StillWithYouCore
+import StillWithYouAssets
 
 private extension String {
   var nonEmpty: String? { isEmpty ? nil : self }
@@ -357,8 +358,8 @@ private extension String {
   }
   func importCharacterPhoto() {
     let panel = NSOpenPanel()
-    panel.title = "选择一张人物照片"
-    panel.message = "图片只在本机处理，生成头像和 11 组动作图，不会自动上传。"
+    panel.title = "选择一张照片，生成桌面动画卡"
+    panel.message = "会保留整张照片，并在本机生成头像和 11 组轻动画卡；不会 AI 改姿势，也不会上传原图。"
     panel.allowedContentTypes = [.image]
     panel.allowsMultipleSelection = false
     panel.canChooseDirectories = false
@@ -369,7 +370,7 @@ private extension String {
       if state.onboarding == nil { state.onboarding = OnboardingState() }
       state.onboarding?.photoConfigured = true
       save(); refreshPet?()
-      notice = "已在本机生成头像和 \(manifest.actions.count) 组动作图。原照片没有复制进应用资料库。"
+      notice = "已换成这张照片，并生成 \(manifest.actions.count) 组轻动画卡。原照片没有复制进应用资料库。"
     } catch { notice = "图片处理失败：\(error.localizedDescription)" }
   }
   func applyKnowledgeCorrection(_ statement: String, target: CorrectionTarget) {

@@ -9,10 +9,14 @@ let package = Package(
   ],
   targets: [
     .target(name: "StillWithYouCore", resources: [.process("Resources")]),
+    .target(name: "StillWithYouAssets"),
     .executableTarget(
-      name: "StillWithYouApp", dependencies: ["StillWithYouCore"],
+      name: "StillWithYouApp", dependencies: ["StillWithYouCore", "StillWithYouAssets"],
       resources: [.process("Resources")]),
     .executableTarget(
       name: "CoreChecks", dependencies: ["StillWithYouCore"], path: "Tests/CoreChecks"),
+    .executableTarget(
+      name: "CharacterAssetChecks", dependencies: ["StillWithYouAssets"],
+      path: "Tests/CharacterAssetChecks"),
   ],
   swiftLanguageModes: [.v5])

@@ -996,6 +996,25 @@ do {
   XCTAssertThrowsError(try invalid.validatedCharacterFiles())
   print("PASS: portable backup carries generated assets and rejects path traversal")
 }
+
+// Public seam: replacing a generated custom character at the same path must
+// invalidate the desktop cache. The picker value remains "custom", so the
+// cache key has to reflect the file contents rather than only the selection.
+do {
+  let folder = FileManager.default.temporaryDirectory
+    .appendingPathComponent("character-revision-\(UUID().uuidString)", isDirectory: true)
+  try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: folder) }
+  let asset = folder.appendingPathComponent("custom-spritesheet.png")
+  try Data([0x10, 0x20, 0x30, 0x40]).write(to: asset)
+  let first = try CharacterAssetRevision.cacheKey(selection: "custom", customAssetURL: asset)
+  try Data([0x40, 0x30, 0x20, 0x10]).write(to: asset)
+  let second = try CharacterAssetRevision.cacheKey(selection: "custom", customAssetURL: asset)
+  precondition(first != second)
+  let builtIn = try CharacterAssetRevision.cacheKey(selection: "default", customAssetURL: asset)
+  precondition(builtIn == "default")
+  print("PASS: replacing a custom character invalidates the desktop asset cache")
+}
 let recallRows = [
   HistoricalMessage(id: "a", timestamp: "2026-02-22 12:00", speaker: "我", text: "我明天来找你，一起吃火锅"),
   HistoricalMessage(id: "b", timestamp: "2026-02-22 12:01", speaker: "她", text: "明天不行，改天嘛"),

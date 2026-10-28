@@ -977,16 +977,16 @@ struct SettingsView: View {
         }
 
         Card {
-          Text("桌面角色模型").font(.headline)
+          Text("桌面照片角色").font(.headline)
           Picker("桌面人物模型", selection: Binding(
             get: { model.state.preferences.desktopCharacterID ?? "default" },
             set: { model.state.preferences.desktopCharacterID = $0; model.resetDuoSpeechVoiceRotation(); model.save(); model.refreshPet?() }
           )) {
             Text("内置抽象形象").tag("default")
-            if model.hasCustomCharacter { Text("我的照片动作包").tag("custom") }
+            if model.hasCustomCharacter { Text("我的照片动画卡").tag("custom") }
           }
-          Button(model.hasCustomCharacter ? "重新生成我的动作包…" : "用照片生成动作包…") { model.importCharacterPhoto() }
-          Text("图片只在本机处理。会生成头像、11 组动作图和桌面动画；原照片不会被复制进资料库。")
+          Button(model.hasCustomCharacter ? "换一张照片并重新生成…" : "用照片生成动画卡…") { model.importCharacterPhoto() }
+          Text("图片只在本机处理。会保留整张照片，生成头像和 11 组带动作标识的轻动画卡；不会用 AI 改人物姿势，原照片也不会被复制进资料库。")
             .font(.caption).foregroundStyle(.secondary)
           ReadingBookSettings(model: model)
           Toggle(UIStrings.text("始终置顶"), isOn: $model.state.preferences.alwaysOnTop).onChange(
