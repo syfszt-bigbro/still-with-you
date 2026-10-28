@@ -63,10 +63,18 @@ let avatarURL = character.appendingPathComponent(manifest.avatar)
 let privateSourceURL = character.appendingPathComponent("source-private.png")
 precondition(FileManager.default.fileExists(atPath: sheetURL.path))
 precondition(FileManager.default.fileExists(atPath: privateSourceURL.path))
+let sheetBitmap = NSBitmapImageRep(data: try Data(contentsOf: sheetURL))
+precondition(sheetBitmap?.pixelsWide == 1536 && sheetBitmap?.pixelsHigh == 2288,
+  "sprite sheet must use stable 1x pixel dimensions on Retina displays")
+let avatarBitmap = NSBitmapImageRep(data: try Data(contentsOf: avatarURL))
+precondition(avatarBitmap?.pixelsWide == 512 && avatarBitmap?.pixelsHigh == 512)
 precondition(containsFourSourceBands(avatarURL), "avatar cropped away part of the uploaded photo")
 for action in manifest.actions {
   let actionURL = character.appendingPathComponent("actions/\(action).png")
   precondition(FileManager.default.fileExists(atPath: actionURL.path))
+  let actionBitmap = NSBitmapImageRep(data: try Data(contentsOf: actionURL))
+  precondition(actionBitmap?.pixelsWide == 192 && actionBitmap?.pixelsHigh == 208,
+    "\(action) must use stable 1x pixel dimensions")
   precondition(containsFourSourceBands(actionURL), "\(action) cropped away part of the uploaded photo")
 }
 

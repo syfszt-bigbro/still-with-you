@@ -25,6 +25,11 @@ struct MainView: View {
     ("今天", "sun.max"), ("排计划", "calendar"), ("统计", "chart.bar.xaxis"), ("陪伴", "bubble.left.and.bubble.right"),
     ("记忆", "book.closed"), ("设置", "slider.horizontal.3"),
   ]
+  private var localVersionLabel: String {
+    let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    return UIStrings.text("本机保存 · 0.2").replacingOccurrences(
+      of: "0.2", with: version.map { "v\($0)" } ?? "开发版")
+  }
   var body: some View {
     HStack(spacing: 0) {
       VStack(alignment: .leading, spacing: 12) {
@@ -45,7 +50,7 @@ struct MainView: View {
         }
         Spacer()
         Text(model.voice("footer", "你的节奏，一起记得。")).font(.caption).foregroundStyle(.secondary)
-        Text(UIStrings.text("本机保存 · 0.2")).font(.caption2).foregroundStyle(.tertiary)
+        Text(localVersionLabel).font(.caption2).foregroundStyle(.tertiary)
       }.padding(22).frame(width: 180).background(Color.white.opacity(0.65))
       VStack(spacing: 0) {
         if !model.storageError.isEmpty { banner(model.storageError, color: .red) }
@@ -1115,27 +1120,11 @@ struct SettingsView: View {
         }
 
         Card {
-          Text("桌面照片角色").font(.headline)
-          Picker("桌面人物模型", selection: Binding(
-            get: { model.state.preferences.desktopCharacterID ?? "default" },
-            set: { model.state.preferences.desktopCharacterID = $0; model.save(); model.refreshPet?() }
-          )) {
-            Text("内置抽象形象").tag("default")
-            if model.hasCustomCharacter { Text("我的照片动画卡").tag("custom") }
-          }
-          if model.hasCustomCharacter { CharacterAssetPreviewStrip(model: model) }
-          HStack {
-            if model.hasCustomCharacter {
-              Button(model.canAdjustCharacterPhoto ? "调整取景…" : "重新选择后调整…") {
-                model.adjustCharacterPhoto()
-              }
-            }
-            Button(model.hasCustomCharacter ? "换一张照片…" : "选择照片并预览…") {
-              model.importCharacterPhoto()
-            }
-          }
-          Text("图片只在本机处理。选择后先预览和调整，确认后生成头像及 11 组轻动画卡；私人工作图用于以后再次调整，不进入导出备份。")
-            .font(.caption).foregroundStyle(.secondary)
+          CharacterAssetSettingsPanel(model: model)
+        }
+
+        Card {
+          Text("桌面互动与提醒").font(.headline)
           ReadingBookSettings(model: model)
           Toggle(UIStrings.text("始终置顶"), isOn: $model.state.preferences.alwaysOnTop).onChange(
             of: model.state.preferences.alwaysOnTop

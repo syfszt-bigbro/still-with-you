@@ -1,10 +1,16 @@
 import Foundation
+import LocalAuthentication
 import Security
 
-// Stable executable identity: v2 adds the optional cloud-speech account while
-// retaining the same Keychain service so existing chat keys remain readable.
+// Stable executable identity: v3 prevents background reads from showing a
+// Keychain prompt while retaining the same service so existing keys remain readable.
 // Secrets travel only through anonymous pipes, never arguments or files.
-struct Request: Decodable { let action: String; let account: String; let value: String? }
+struct Request: Decodable {
+  let action: String
+  let account: String
+  let value: String?
+  let allowPrompt: String?
+}
 struct Reply: Encodable { let status: Int32; let value: String? }
 func run() -> Reply {
   guard let request = try? JSONDecoder().decode(Request.self, from: FileHandle.standardInput.readDataToEndOfFile()),
@@ -20,6 +26,9 @@ func run() -> Reply {
     var read = query
     read[kSecReturnData as String] = true
     read[kSecMatchLimit as String] = kSecMatchLimitOne
+    let context = LAContext()
+    context.interactionNotAllowed = request.allowPrompt != "true"
+    read[kSecUseAuthenticationContext as String] = context
     var result: CFTypeRef?
     status = SecItemCopyMatching(read as CFDictionary, &result)
     return Reply(status: status, value: (result as? Data).flatMap { String(data: $0, encoding: .utf8) })

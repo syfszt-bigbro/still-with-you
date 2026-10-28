@@ -26,7 +26,7 @@ struct AppFailure: LocalizedError {
   static func get(_ account: String, allowPrompt: Bool = false) -> String {
     if let cached = sessionValues[account] { return cached }
     if !allowPrompt && unavailableAccounts.contains(account), Date().timeIntervalSince(failedAt[account] ?? .distantPast) < 30 { return "" }
-    let persistent = CredentialVault.call("read", account: account)
+    let persistent = CredentialVault.call("read", account: account, allowPrompt: allowPrompt)
     if persistent.status == errSecSuccess, let value = persistent.value, !value.isEmpty {
       sessionValues[account] = value
       unavailableAccounts.remove(account)

@@ -571,6 +571,9 @@ struct PendingCharacterPhoto: Identifiable {
   var characterAvatarURL: URL {
     directory.appendingPathComponent("character/custom-avatar.png")
   }
+  var characterSpriteSheetURL: URL {
+    directory.appendingPathComponent("character/custom-spritesheet.png")
+  }
   func characterActionURL(_ action: String) -> URL {
     directory.appendingPathComponent("character/actions/\(action).png")
   }

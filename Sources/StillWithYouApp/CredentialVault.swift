@@ -5,12 +5,14 @@ import Security
 /// Its Keychain identity therefore does not inherit the app's changing ad-hoc hash.
 enum CredentialVault {
   struct Reply: Decodable { let status: Int32; let value: String? }
-  static func call(_ action: String, account: String, value: String? = nil) -> Reply {
+  static func call(
+    _ action: String, account: String, value: String? = nil, allowPrompt: Bool = false
+  ) -> Reply {
     do {
       let fm = FileManager.default
       let folder = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         .appendingPathComponent("StillWithYou/Credentials", isDirectory: true)
-      let helper = "credential-vault-v2"
+      let helper = "credential-vault-v3"
       let executable = folder.appendingPathComponent(helper)
       if !fm.fileExists(atPath: executable.path) {
         guard let bundled = Bundle.main.url(forResource: helper, withExtension: nil) else {
@@ -29,6 +31,7 @@ enum CredentialVault {
       try process.run()
       var request = ["action": action, "account": account]
       request["value"] = value
+      request["allowPrompt"] = allowPrompt ? "true" : "false"
       try input.fileHandleForWriting.write(contentsOf: JSONEncoder().encode(request))
       try input.fileHandleForWriting.close()
       let response = output.fileHandleForReading.readDataToEndOfFile()

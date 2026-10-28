@@ -76,14 +76,20 @@ private struct ReachAnimation: Decodable {
         ?? Bundle.module.url(forResource: resource, withExtension: "png"))
     if let url,
       let image = NSImage(contentsOf: url),
-      let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil), cg.width == 1536,
-      cg.height == 2288
+      let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+      cg.width % 8 == 0, cg.height % 11 == 0,
+      cg.width / 8 >= 192, cg.height / 11 >= 208
     {
+      let frameWidth = cg.width / 8
+      let frameHeight = cg.height / 11
       for r in 0..<11 {
         var line: [NSImage] = []
         var bits: [NSBitmapImageRep] = []
         for c in 0..<8 {
-          if let crop = cg.cropping(to: CGRect(x: c * 192, y: r * 208, width: 192, height: 208)) {
+          if let crop = cg.cropping(to: CGRect(
+            x: c * frameWidth, y: r * frameHeight,
+            width: frameWidth, height: frameHeight))
+          {
             line.append(NSImage(cgImage: crop, size: NSSize(width: 192, height: 208)))
             bits.append(NSBitmapImageRep(cgImage: crop))
           }
@@ -230,10 +236,15 @@ private struct ReachAnimation: Decodable {
     guard bounds.contains(point), frameBitmaps.count > row, frameBitmaps[row].count > col,
       bounds.width > 0, bounds.height > 0
     else { return false }
-    let rawX = min(191, max(0, Int(point.x / bounds.width * 192)))
-    let x = row == 11 && reachMirrored ? 191 - rawX : rawX
-    let y = min(207, max(0, Int((1 - point.y / bounds.height) * 208)))
-    return (frameBitmaps[row][col].colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.15
+    let bitmap = frameBitmaps[row][col]
+    let rawX = min(
+      bitmap.pixelsWide - 1,
+      max(0, Int(point.x / bounds.width * CGFloat(bitmap.pixelsWide))))
+    let x = row == 11 && reachMirrored ? bitmap.pixelsWide - 1 - rawX : rawX
+    let y = min(
+      bitmap.pixelsHigh - 1,
+      max(0, Int((1 - point.y / bounds.height) * CGFloat(bitmap.pixelsHigh))))
+    return (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.15
   }
   override func draw(_ dirtyRect: NSRect) {
     if let staticCharacter, let imageRect = staticCharacterRect {

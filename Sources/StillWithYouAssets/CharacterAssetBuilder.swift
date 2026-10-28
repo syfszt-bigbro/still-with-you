@@ -241,8 +241,26 @@ public enum CharacterAssetBuilder {
   }
 
   private static func pngData(_ image: NSImage) throws -> Data {
-    guard let tiff = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff),
-      let data = bitmap.representation(using: .png, properties: [:]) else {
+    let width = max(1, Int(image.size.width.rounded()))
+    let height = max(1, Int(image.size.height.rounded()))
+    guard let bitmap = NSBitmapImageRep(
+      bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
+      bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+      colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0),
+      let context = NSGraphicsContext(bitmapImageRep: bitmap)
+    else {
+      throw CharacterAssetError(message: "无法写出 PNG 动作图。")
+    }
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = context
+    context.imageInterpolation = .high
+    NSColor.clear.setFill()
+    NSRect(x: 0, y: 0, width: width, height: height).fill()
+    image.draw(
+      in: NSRect(x: 0, y: 0, width: width, height: height), from: .zero,
+      operation: .sourceOver, fraction: 1)
+    NSGraphicsContext.restoreGraphicsState()
+    guard let data = bitmap.representation(using: .png, properties: [:]) else {
       throw CharacterAssetError(message: "无法写出 PNG 动作图。")
     }
     return data
